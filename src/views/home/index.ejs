@@ -1,0 +1,353 @@
+<!-- Hero Section with Banner -->
+<section class="relative overflow-hidden bg-linear-to-br from-teal-50 via-cyan-50 to-lime-50">
+	<div class="absolute inset-0 bg-linear-to-br from-teal-500/5 to-lime-500/5"></div>
+
+	<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+		<!-- Logo Banner -->
+		<div class="text-center mb-8">
+			<img src="/images/weightogether_banner.png" alt="WeighTogether" class="h-16 sm:h-20 mx-auto" />
+		</div>
+
+		<!-- Hero Content -->
+		<div class="text-center max-w-3xl mx-auto mb-12">
+			<div class="inline-flex items-center gap-2 bg-teal-100 text-teal-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+				</svg>
+				Free & Privacy Focused
+			</div>
+
+			<h1 class="text-4xl font-display font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
+				Track Together.<br>
+				<span class="bg-linear-to-r from-teal-600 to-lime-600 bg-clip-text text-transparent">
+					Transform Together.
+				</span>
+			</h1>
+
+			<p class="text-xl leading-8 text-slate-700 mb-8">
+				Join a supportive community where your fitness journey becomes our shared mission.
+				Track progress, celebrate wins, and reach your goals together.
+			</p>
+
+			<div class="flex flex-col sm:flex-row gap-4 justify-center">
+				<% if (typeof user !== 'undefined' && user) { %>
+					<a href="/dashboard" class="group inline-flex justify-center items-center rounded-xl bg-linear-to-r from-teal-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
+						Go to Dashboard
+						<svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+						</svg>
+					</a>
+				<% } else { %>
+					<a href="/register" class="group inline-flex justify-center items-center rounded-xl bg-linear-to-r from-teal-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
+						Start Your Journey
+						<svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+						</svg>
+					</a>
+					<a href="/login" class="inline-flex justify-center items-center rounded-xl bg-white px-8 py-4 text-lg font-semibold text-slate-900 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 border border-slate-200">
+						Sign In
+					</a>
+				<% } %>
+			</div>
+		</div>
+
+		<!-- Feature Cards with Icons -->
+		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+			<div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+				<div class="w-12 h-12 bg-linear-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center mb-3">
+					<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+					</svg>
+				</div>
+				<h3 class="font-bold text-slate-900 mb-1">Smart Tracking</h3>
+				<p class="text-sm text-slate-600">Charts & insights</p>
+			</div>
+
+			<div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+				<div class="w-12 h-12 bg-linear-to-br from-lime-500 to-emerald-500 rounded-xl flex items-center justify-center mb-3">
+					<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+					</svg>
+				</div>
+				<h3 class="font-bold text-slate-900 mb-1">Team Power</h3>
+				<p class="text-sm text-slate-600">Accountability groups</p>
+			</div>
+
+			<div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+				<div class="w-12 h-12 bg-linear-to-br from-violet-500 to-purple-500 rounded-xl flex items-center justify-center mb-3">
+					<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>
+				</div>
+				<h3 class="font-bold text-slate-900 mb-1">Challenges</h3>
+				<p class="text-sm text-slate-600">Motivating goals</p>
+			</div>
+
+			<div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+				<div class="w-12 h-12 bg-linear-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center mb-3">
+					<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+					</svg>
+				</div>
+				<h3 class="font-bold text-slate-900 mb-1">Progress Photos</h3>
+				<p class="text-sm text-slate-600">Visual journey</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- Together Activities Section -->
+<section class="py-20 bg-slate-50">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center mb-16">
+			<h2 class="text-3xl font-display font-bold text-slate-900 sm:text-4xl mb-4">
+				Better Together
+			</h2>
+			<p class="text-xl text-slate-600 max-w-2xl mx-auto">
+				Whether you're running, lifting, or hiking—your goals are achievable when you have a team by your side.
+			</p>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+			<!-- Run Together -->
+			<div class="group relative bg-linear-to-br from-cyan-50 to-teal-50 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-cyan-100">
+				<div class="relative h-48 mb-6 rounded-2xl overflow-hidden">
+					<img src="/images/runtogether.png" alt="Run Together" class="w-full h-full object-contain" />
+				</div>
+				<h3 class="text-2xl font-bold text-slate-900 mb-3">Run Together</h3>
+				<p class="text-slate-700 leading-relaxed">
+					Join running challenges, track your cardio progress, and motivate each other to hit new distance goals.
+				</p>
+			</div>
+
+			<!-- Lift Together -->
+			<div class="group relative bg-linear-to-br from-lime-50 to-emerald-50 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-lime-100">
+				<div class="relative h-48 mb-6 rounded-2xl overflow-hidden">
+					<img src="/images/lifttogether.png" alt="Lift Together" class="w-full h-full object-contain" />
+				</div>
+				<h3 class="text-2xl font-bold text-slate-900 mb-3">Lift Together</h3>
+				<p class="text-slate-700 leading-relaxed">
+					Celebrate strength gains, share workout tips, and support each other through every rep and set.
+				</p>
+			</div>
+
+			<!-- Hike Together -->
+			<div class="group relative bg-linear-to-br from-amber-50 to-yellow-50 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-amber-100">
+				<div class="relative h-48 mb-6 rounded-2xl overflow-hidden">
+					<img src="/images/hiketogether.png" alt="Hike Together" class="w-full h-full object-contain" />
+				</div>
+				<h3 class="text-2xl font-bold text-slate-900 mb-3">Hike Together</h3>
+				<p class="text-slate-700 leading-relaxed">
+					Reach new peaks together, share trail experiences, and celebrate every summit as a team victory.
+				</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- Privacy Section -->
+<section class="py-16 bg-linear-to-br from-teal-100 to-cyan-100 border-y border-teal-200">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="max-w-4xl mx-auto">
+			<div class="flex items-start gap-6">
+				<div class="shrink-0">
+					<div class="w-16 h-16 bg-linear-to-br from-teal-600 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
+						<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+						</svg>
+					</div>
+				</div>
+				<div class="flex-1">
+					<h3 class="text-2xl font-bold text-slate-900 mb-4">Your Privacy Matters</h3>
+					<ul class="space-y-3">
+						<li class="flex items-start gap-3">
+							<svg class="w-6 h-6 text-teal-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							</svg>
+							<span class="text-slate-700"><strong class="text-slate-900">Private by default:</strong> Your weight data is yours alone unless you choose to share</span>
+						</li>
+						<li class="flex items-start gap-3">
+							<svg class="w-6 h-6 text-teal-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							</svg>
+							<span class="text-slate-700"><strong class="text-slate-900">No ads, no tracking:</strong> We don't sell your data or show targeted advertising</span>
+						</li>
+						<li class="flex items-start gap-3">
+							<svg class="w-6 h-6 text-teal-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							</svg>
+							<span class="text-slate-700"><strong class="text-slate-900">You're in control:</strong> Choose what to share with teams, delete your data anytime</span>
+						</li>
+					</ul>
+					<a href="/about#privacy" class="inline-flex items-center mt-6 text-teal-700 font-semibold hover:text-teal-800 transition-colors">
+						Read our full privacy commitment
+						<svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+						</svg>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- How It Works -->
+<section class="py-20 bg-white">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center mb-16">
+			<h2 class="text-3xl font-display font-bold text-slate-900 sm:text-4xl mb-4">
+				How It Works
+			</h2>
+			<p class="text-xl text-slate-600">
+				Get started in minutes, see results that last
+			</p>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+			<div class="relative text-center">
+				<div class="w-16 h-16 bg-linear-to-br from-teal-600 to-cyan-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
+					1
+				</div>
+				<h3 class="text-xl font-bold text-slate-900 mb-3">Create Your Profile</h3>
+				<p class="text-slate-600 leading-relaxed">
+					Set your goals, choose your unit system, and customize your tracking preferences in seconds.
+				</p>
+			</div>
+
+			<div class="relative text-center">
+				<div class="w-16 h-16 bg-linear-to-br from-lime-600 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
+					2
+				</div>
+				<h3 class="text-xl font-bold text-slate-900 mb-3">Track Daily</h3>
+				<p class="text-slate-600 leading-relaxed">
+					Log your weight, add progress photos, and watch your charts reveal your transformation journey.
+				</p>
+			</div>
+
+			<div class="relative text-center">
+				<div class="w-16 h-16 bg-linear-to-br from-violet-600 to-purple-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
+					3
+				</div>
+				<h3 class="text-xl font-bold text-slate-900 mb-3">Join a Team</h3>
+				<p class="text-slate-600 leading-relaxed">
+					Connect with others, participate in challenges, and celebrate every milestone together.
+				</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- Health & Wellness News -->
+<section class="py-20 bg-slate-50">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center mb-16">
+			<h2 class="text-3xl font-display font-bold text-slate-900 sm:text-4xl mb-4">
+				Health & Wellness News
+			</h2>
+			<p class="text-lg text-slate-500">
+				Stay informed with the latest in fitness, nutrition, and weight loss
+			</p>
+		</div>
+
+		<% if (featuredNews && featuredNews.length > 0) { %>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+				<% featuredNews.forEach(function(article) { %>
+					<article class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+						<% if (article.imageUrl) { %>
+							<div class="h-48 overflow-hidden">
+								<img
+									src="<%= article.imageUrl %>"
+									alt="<%= article.title %>"
+									class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+									onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-linear-to-br from-teal-100 to-cyan-100 flex items-center justify-center\'><svg class=\'w-12 h-12 text-teal-400\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z\'></path></svg></div>'"
+								/>
+							</div>
+						<% } else { %>
+							<div class="h-48 bg-linear-to-br from-teal-100 to-cyan-100 flex items-center justify-center">
+								<svg class="w-12 h-12 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+								</svg>
+							</div>
+						<% } %>
+						<div class="p-6 flex flex-col flex-1">
+							<div class="flex items-center gap-2 mb-3">
+								<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800 capitalize">
+									<%= article.category %>
+								</span>
+								<span class="text-xs text-slate-500"><%= article.formattedDate %></span>
+							</div>
+							<h3 class="text-lg font-bold text-slate-900 mb-2 line-clamp-2">
+								<% if (article.url && article.url !== '#') { %>
+									<a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors">
+										<%= article.title %>
+									</a>
+								<% } else { %>
+									<%= article.title %>
+								<% } %>
+							</h3>
+							<p class="text-slate-600 text-sm leading-relaxed line-clamp-3 flex-1">
+								<%= article.description %>
+							</p>
+							<div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+								<span class="text-xs text-slate-500 font-medium"><%= article.source.name %></span>
+								<% if (article.url && article.url !== '#') { %>
+									<a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="text-teal-600 text-sm font-semibold hover:text-teal-700 transition-colors inline-flex items-center gap-1">
+										Read More
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+										</svg>
+									</a>
+								<% } %>
+							</div>
+						</div>
+					</article>
+				<% }); %>
+			</div>
+		<% } else { %>
+			<div class="text-center py-12">
+				<div class="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
+					<svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+					</svg>
+				</div>
+				<p class="text-slate-600">News articles will appear here soon.</p>
+			</div>
+		<% } %>
+	</div>
+</section>
+
+<section class="py-20 bg-linear-to-br from-teal-600 via-cyan-600 to-teal-600 relative overflow-hidden">
+	<div class="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+		<h2 class="text-3xl font-display font-bold text-white sm:text-4xl mb-6">
+			Ready to Transform Together?
+		</h2>
+		<p class="text-xl text-teal-50 mb-10 leading-relaxed">
+			Join thousands of members tracking their progress, supporting each other, and achieving their goals.
+			Free forever. No credit card required.
+		</p>
+		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+			<% if (typeof user !== 'undefined' && user) { %>
+				<a href="/dashboard" class="group w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-white px-8 py-4 text-lg font-bold text-teal-600 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200">
+					Go to Dashboard
+					<svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+					</svg>
+				</a>
+			<% } else { %>
+				<a href="/register" class="group w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-white px-8 py-4 text-lg font-bold text-teal-600 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200">
+					Create Your Free Account
+					<svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+					</svg>
+				</a>
+			<% } %>
+			<a href="/about" class="w-full sm:w-auto inline-flex justify-center items-center text-lg font-semibold text-white hover:text-teal-100 transition-colors">
+				Learn More
+				<svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+				</svg>
+			</a>
+		</div>
+	</div>
+</section>

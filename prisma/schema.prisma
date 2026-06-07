@@ -1,0 +1,556 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+	provider = "prisma-client-js"
+}
+
+datasource db {
+	provider = "postgresql"
+}
+
+// Enums
+enum Theme {
+	LIGHT
+	SYSTEM
+}
+
+enum UnitSystem {
+	IMPERIAL // pounds, feet, inches
+	METRIC   // kilograms, meters, centimeters
+}
+
+enum Gender {
+	MALE
+	FEMALE
+	OTHER
+	PREFER_NOT_TO_SAY
+}
+
+enum ActivityLevel {
+	SEDENTARY
+	LIGHTLY_ACTIVE
+	MODERATELY_ACTIVE
+	VERY_ACTIVE
+	EXTREMELY_ACTIVE
+}
+
+enum TeamRole {
+	OWNER
+	ADMIN
+	MODERATOR
+	MEMBER
+}
+
+enum PostType {
+	GENERAL
+	MILESTONE
+	TIP
+	QUESTION
+	RECIPE
+	WORKOUT
+}
+
+enum PostVisibility {
+	PUBLIC
+	TEAM
+	FOLLOWERS
+}
+
+enum EntryVisibility {
+	PRIVATE
+	TEAM
+	PUBLIC
+}
+
+enum ChallengeType {
+	WEIGHT_LOSS_PERCENTAGE
+	TOTAL_WEIGHT_LOSS
+	CONSISTENCY
+	ACTIVITY_BASED
+}
+
+enum ChallengeStatus {
+	UPCOMING
+	ACTIVE
+	COMPLETED
+	CANCELLED
+}
+
+// Models
+model User {
+	id                String        @id @default(uuid())
+	email             String        @unique
+	username          String        @unique
+	passwordHash      String?       // Optional for social auth users
+	displayName       String?
+	avatarUrl         String?
+	bio               String?
+
+	// Weight tracking preferences
+	unitSystem        UnitSystem    @default(IMPERIAL)
+	currentWeight     Float?
+	goalWeight        Float?
+	targetDate        DateTime?
+	height            Float?
+	dateOfBirth       DateTime?
+	gender            Gender?
+	activityLevel     ActivityLevel?
+	theme             Theme         @default(SYSTEM)
+
+	// Privacy settings
+	profilePublic     Boolean       @default(true)
+	weightVisible     Boolean       @default(true)
+
+	// Account status
+	emailVerified     Boolean       @default(false)
+	emailVerificationToken String?   @unique
+	emailVerificationExpires DateTime?
+	isActive          Boolean       @default(true)
+	isAdmin           Boolean       @default(false)
+	lastLoginAt       DateTime?
+
+	// Timestamps
+	createdAt         DateTime      @default(now())
+	updatedAt         DateTime      @updatedAt
+	deletedAt         DateTime?
+
+	// Relations
+	weightEntries     WeightEntry[]
+	teamMemberships   TeamMember[]
+	ownedTeams        Team[]        @relation("TeamOwner")
+	posts             Post[]
+	comments          Comment[]
+	likes             Like[]
+	readPosts         PostRead[]
+	sentMessages      Message[]     @relation("MessageSender")
+	conversations     ConversationParticipant[]
+	challengeParticipants ChallengeParticipant[]
+	achievements      UserAchievement[]
+	refreshTokens     RefreshToken[]
+	donations         Donation[]
+	donationSubscriptions DonationSubscription[]
+	socialAccounts    SocialAccount[]
+
+	@@index([email])
+	@@index([username])
+}
+
+model WeightEntry {
+	id                  String           @id @default(uuid())
+	userId              String
+	user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	weight              Float
+	bodyFatPercentage   Float?
+	muscleMass          Float?
+	waterPercentage     Float?
+	notes               String?
+	photoUrls           String[]         // Deprecated: use photos relation instead
+	visibility          EntryVisibility  @default(PRIVATE)
+
+	recordedAt          DateTime         @default(now())
+	createdAt           DateTime         @default(now())
+	updatedAt           DateTime         @updatedAt
+
+	// Relations
+	photos              ProgressPhoto[]
+
+	@@index([userId, recordedAt(sort: Desc)])
+	@@index([recordedAt(sort: Desc)])
+	@@index([visibility, recordedAt(sort: Desc)])
+}
+
+model ProgressPhoto {
+	id              String           @id @default(uuid())
+	entryId         String
+	entry           WeightEntry      @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+	url             String
+	visibility      EntryVisibility  @default(PRIVATE)
+	sortOrder       Int              @default(0)
+
+	createdAt       DateTime         @default(now())
+	updatedAt       DateTime         @updatedAt
+
+	@@index([entryId])
+	@@index([visibility])
+}
+
+model Team {
+	id              String       @id @default(uuid())
+	name            String       @unique
+	description     String?
+	avatarUrl       String?
+	isPublic        Boolean      @default(true)
+	inviteCode      String       @unique @default(uuid())
+	maxMembers      Int          @default(50)
+
+	ownerId         String
+	owner           User         @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+	createdAt       DateTime     @default(now())
+	updatedAt       DateTime     @updatedAt
+
+	// Relations
+	members         TeamMember[]
+	posts           Post[]
+	challenges      Challenge[]
+	conversations   Conversation[]
+
+	@@index([name])
+	@@index([ownerId])
+}
+
+model TeamMember {
+	id          String     @id @default(uuid())
+	teamId      String
+	team        Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+	userId      String
+	user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	role        TeamRole   @default(MEMBER)
+	joinedAt    DateTime   @default(now())
+
+	@@unique([teamId, userId])
+	@@index([userId])
+	@@index([teamId])
+}
+
+model Post {
+	id          String          @id @default(uuid())
+	authorId    String
+	author      User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+	teamId      String?
+	team        Team?           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+	type        PostType        @default(GENERAL)
+	visibility  PostVisibility  @default(PUBLIC)
+	title       String?
+	content     String
+	mediaUrls   String[]
+	tags        String[]
+
+	createdAt   DateTime        @default(now())
+	updatedAt   DateTime        @updatedAt
+	deletedAt   DateTime?
+
+	// Relations
+	comments    Comment[]
+	likes       Like[]
+	reads       PostRead[]
+
+	@@index([authorId, createdAt(sort: Desc)])
+	@@index([teamId, visibility, createdAt(sort: Desc)])
+	@@index([createdAt(sort: Desc)])
+}
+
+model Comment {
+	id          String    @id @default(uuid())
+	postId      String
+	post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+	authorId    String
+	author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+	content     String
+	parentId    String?
+	parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+	replies     Comment[] @relation("CommentReplies")
+
+	createdAt   DateTime  @default(now())
+	updatedAt   DateTime  @updatedAt
+	deletedAt   DateTime?
+
+	@@index([postId, createdAt])
+	@@index([parentId])
+}
+
+model Like {
+	id        String   @id @default(uuid())
+	postId    String
+	post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+	userId    String
+	user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	createdAt DateTime @default(now())
+
+	@@unique([postId, userId])
+	@@index([userId])
+}
+
+model PostRead {
+	id        String   @id @default(uuid())
+	postId    String
+	post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+	userId    String
+	user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	readAt    DateTime @default(now())
+
+	@@unique([postId, userId])
+	@@index([userId])
+	@@index([postId])
+}
+
+model Conversation {
+	id            String                      @id @default(uuid())
+	name          String?
+	isGroup       Boolean                     @default(false)
+	teamId        String?
+	team          Team?                       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+	createdAt     DateTime                    @default(now())
+	updatedAt     DateTime                    @updatedAt
+
+	// Relations
+	participants  ConversationParticipant[]
+	messages      Message[]
+
+	@@index([teamId])
+}
+
+model ConversationParticipant {
+	id              String       @id @default(uuid())
+	conversationId  String
+	conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+	userId          String
+	user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	lastReadAt      DateTime?
+	joinedAt        DateTime     @default(now())
+
+	@@unique([conversationId, userId])
+	@@index([userId])
+}
+
+model Message {
+	id              String       @id @default(uuid())
+	conversationId  String
+	conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+	senderId        String
+	sender          User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+	content         String
+	mediaUrls       String[]
+
+	isEdited        Boolean      @default(false)
+	deletedAt       DateTime?
+
+	createdAt       DateTime     @default(now())
+	updatedAt       DateTime     @updatedAt
+
+	@@index([conversationId, createdAt])
+	@@index([senderId, createdAt(sort: Desc)])
+}
+
+model Challenge {
+	id            String                  @id @default(uuid())
+	name          String
+	description   String
+	type          ChallengeType
+	status        ChallengeStatus         @default(UPCOMING)
+
+	startDate     DateTime
+	endDate       DateTime
+	targetValue   Float?
+	rewardPoints  Int                     @default(0)
+
+	teamId        String?
+	team          Team?                   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+	createdAt     DateTime                @default(now())
+	updatedAt     DateTime                @updatedAt
+
+	// Relations
+	participants  ChallengeParticipant[]
+
+	@@index([teamId])
+	@@index([startDate, endDate])
+	@@index([status])
+}
+
+model ChallengeParticipant {
+	id            String    @id @default(uuid())
+	challengeId   String
+	challenge     Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+	userId        String
+	user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	progress      Float     @default(0)
+	completed     Boolean   @default(false)
+	completedAt   DateTime?
+
+	joinedAt      DateTime  @default(now())
+
+	@@unique([challengeId, userId])
+	@@index([userId])
+}
+
+model Achievement {
+	id          String   @id @default(uuid())
+	name        String   @unique
+	description String
+	iconUrl     String?
+	points      Int      @default(0)
+	isHidden    Boolean  @default(false)
+
+	createdAt   DateTime @default(now())
+
+	// Relations
+	userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+	id            String      @id @default(uuid())
+	userId        String
+	user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+	achievementId String
+	achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+	unlockedAt    DateTime    @default(now())
+
+	@@unique([userId, achievementId])
+	@@index([userId])
+}
+
+model RefreshToken {
+	id        String   @id @default(uuid())
+	token     String   @unique
+	userId    String
+	user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	expiresAt DateTime
+	createdAt DateTime @default(now())
+
+	@@index([userId])
+	@@index([token])
+}
+
+// Social authentication
+model SocialAccount {
+	id              String         @id @default(uuid())
+	userId          String
+	user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	provider        SocialProvider
+	providerUserId  String         // The user's ID from the provider
+	email           String?        // Email from the provider (may differ from user's email)
+	displayName     String?
+	avatarUrl       String?
+	accessToken     String?        // Encrypted token for API calls (optional)
+	refreshToken    String?        // Encrypted refresh token (optional)
+
+	createdAt       DateTime       @default(now())
+	updatedAt       DateTime       @updatedAt
+
+	@@unique([provider, providerUserId])
+	@@index([userId])
+}
+
+// Donation tracking
+enum SocialProvider {
+	GOOGLE
+	FACEBOOK
+	TWITTER
+}
+
+enum DonationType {
+	ONE_TIME
+	MONTHLY
+	YEARLY
+}
+
+enum DonationStatus {
+	PENDING
+	COMPLETED
+	FAILED
+	REFUNDED
+	CANCELLED
+}
+
+enum SubscriptionStatus {
+	PENDING
+	ACTIVE
+	PAUSED
+	CANCELLED
+	EXPIRED
+}
+
+model Donation {
+	id                  String         @id @default(uuid())
+
+	// PayPal identifiers
+	paypalOrderId       String?        @unique
+	paypalTransactionId String?        @unique
+	paypalPayerId       String?
+	paypalPayerEmail    String?
+
+	// Donation details
+	type                DonationType
+	status              DonationStatus @default(PENDING)
+	amount              Float
+	currency            String         @default("USD")
+
+	// Optional user association (donations can be anonymous)
+	userId              String?
+	user                User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+	// Donor info (for anonymous donations)
+	donorName           String?
+	donorEmail          String?
+
+	// Subscription reference (for recurring donations)
+	subscriptionId      String?
+	subscription        DonationSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+	// Metadata
+	notes               String?
+
+	createdAt           DateTime       @default(now())
+	updatedAt           DateTime       @updatedAt
+	completedAt         DateTime?
+
+	@@index([userId])
+	@@index([subscriptionId])
+	@@index([status])
+	@@index([createdAt(sort: Desc)])
+	@@index([paypalOrderId])
+}
+
+model DonationSubscription {
+	id                    String             @id @default(uuid())
+
+	// PayPal identifiers
+	paypalSubscriptionId  String             @unique
+	paypalPlanId          String
+
+	// Subscription details
+	type                  DonationType       // MONTHLY or YEARLY
+	status                SubscriptionStatus @default(PENDING)
+	amount                Float
+	currency              String             @default("USD")
+
+	// Optional user association
+	userId                String?
+	user                  User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+	// Subscriber info
+	subscriberName        String?
+	subscriberEmail       String?
+
+	// Billing cycle
+	nextBillingDate       DateTime?
+	lastPaymentDate       DateTime?
+
+	createdAt             DateTime           @default(now())
+	updatedAt             DateTime           @updatedAt
+	cancelledAt           DateTime?
+
+	// Relations
+	donations             Donation[]
+
+	@@index([userId])
+	@@index([status])
+	@@index([paypalSubscriptionId])
+}

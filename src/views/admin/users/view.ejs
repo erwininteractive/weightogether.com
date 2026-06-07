@@ -1,0 +1,435 @@
+<div class="min-h-screen bg-slate-50" x-data="{
+	showResetPasswordModal: false,
+	newPassword: '',
+	confirmPassword: '',
+	async resetPassword() {
+		if (this.newPassword !== this.confirmPassword) {
+			alert('Passwords do not match');
+			return;
+		}
+
+		if (this.newPassword.length < 8) {
+			alert('Password must be at least 8 characters');
+			return;
+		}
+
+		if (!confirm(`Are you sure you want to reset this user's password? They will be logged out and need to use the new password.`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/admin/users/<%= viewedUser.id %>/reset-password`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+				body: JSON.stringify({ newPassword: this.newPassword })
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				alert(data.message);
+				this.showResetPasswordModal = false;
+				this.newPassword = '';
+				this.confirmPassword = '';
+			} else {
+				alert(data.message || data.errors?.map(e => e.msg).join(', '));
+			}
+		} catch (error) {
+			console.error(error);
+			alert('An error occurred while resetting the password');
+		}
+	},
+	async toggleAdmin() {
+		if (!confirm(`Are you sure you want to change this user's admin status?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/admin/users/<%= viewedUser.id %>/toggle-admin`, {
+				method: 'POST',
+				headers: { 'Accept': 'application/json' }
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				alert(data.message);
+				window.location.reload();
+			} else {
+				alert(data.message);
+			}
+		} catch (error) {
+			console.error(error);
+			alert('An error occurred');
+		}
+	},
+	async toggleActive() {
+		if (!confirm(`Are you sure you want to change this user's active status?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/admin/users/<%= viewedUser.id %>/toggle-active`, {
+				method: 'POST',
+				headers: { 'Accept': 'application/json' }
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				alert(data.message);
+				window.location.reload();
+			} else {
+				alert(data.message);
+			}
+		} catch (error) {
+			console.error(error);
+			alert('An error occurred');
+		}
+	},
+	async resendVerification() {
+		if (!confirm(`Send verification email to <%= viewedUser.email %>?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/admin/users/<%= viewedUser.id %>/resend-verification`, {
+				method: 'POST',
+				headers: { 'Accept': 'application/json' }
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				alert(data.message);
+			} else {
+				alert(data.message);
+			}
+		} catch (error) {
+			console.error(error);
+			alert('An error occurred');
+		}
+	},
+	async deleteUser() {
+		const confirmed = confirm(
+			'WARNING: This will PERMANENTLY delete this user and ALL their data including:\n\n' +
+			'- Weight entries and progress photos\n' +
+			'- Posts and comments\n' +
+			'- Team memberships\n' +
+			'- Messages\n' +
+			'- Achievements\n\n' +
+			'This action CANNOT be undone.\n\n' +
+			'Are you sure you want to delete <%= viewedUser.username %>?'
+		);
+
+		if (!confirmed) {
+			return;
+		}
+
+		// Double confirmation for safety
+		const doubleConfirmed = confirm(
+			'FINAL CONFIRMATION: Type OK to permanently delete this user.'
+		);
+
+		if (!doubleConfirmed) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/admin/users/<%= viewedUser.id %>/delete`, {
+				method: 'POST',
+				headers: { 'Accept': 'application/json' }
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				alert(data.message);
+				window.location.href = '/admin/users';
+			} else {
+				alert(data.message);
+			}
+		} catch (error) {
+			console.error(error);
+			alert('An error occurred while deleting the user');
+		}
+	}
+}">
+	<!-- Header -->
+	<header class="bg-white border-b border-slate-200">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+			<a href="/admin/users" class="text-teal-600 hover:underline text-sm mb-2 inline-block">
+				← Back to Users
+			</a>
+			<h1 class="text-3xl font-bold text-slate-900">
+				<%= viewedUser.displayName || viewedUser.username %>
+				<% if (viewedUser.isAdmin) { %>
+					<span class="ml-3 px-3 py-1 text-sm bg-purple-100 text-purple-800 rounded-full">Admin</span>
+				<% } %>
+			</h1>
+			<p class="text-slate-600 mt-2">@<%= viewedUser.username %> • <%= viewedUser.email %></p>
+		</div>
+	</header>
+
+	<!-- Main Content -->
+	<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+		<div class="grid lg:grid-cols-3 gap-6">
+			<!-- User Information -->
+			<div class="lg:col-span-2 space-y-6">
+				<!-- Basic Info -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<h2 class="text-xl font-semibold text-slate-900 mb-4">User Information</h2>
+					<dl class="space-y-3">
+						<div>
+							<dt class="text-sm text-slate-600">User ID</dt>
+							<dd class="text-slate-900 font-mono text-sm"><%= viewedUser.id %></dd>
+						</div>
+						<div>
+							<dt class="text-sm text-slate-600">Email</dt>
+							<dd class="text-slate-900"><%= viewedUser.email %></dd>
+						</div>
+						<div>
+							<dt class="text-sm text-slate-600">Username</dt>
+							<dd class="text-slate-900">@<%= viewedUser.username %></dd>
+						</div>
+						<% if (viewedUser.bio) { %>
+							<div>
+								<dt class="text-sm text-slate-600">Bio</dt>
+								<dd class="text-slate-900"><%= viewedUser.bio %></dd>
+							</div>
+						<% } %>
+						<div>
+							<dt class="text-sm text-slate-600">Date of Birth</dt>
+							<dd class="text-slate-900">
+								<% if (viewedUser.dateOfBirth) { %>
+									<%= new Date(viewedUser.dateOfBirth).toLocaleDateString() %>
+								<% } else { %>
+									Not provided
+								<% } %>
+							</dd>
+						</div>
+						<div>
+							<dt class="text-sm text-slate-600">Unit System</dt>
+							<dd class="text-slate-900"><%= viewedUser.unitSystem %></dd>
+						</div>
+					</dl>
+				</div>
+
+				<!-- Weight Tracking -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<h2 class="text-xl font-semibold text-slate-900 mb-4">Weight Tracking</h2>
+					<dl class="grid grid-cols-2 gap-4">
+						<div>
+							<dt class="text-sm text-slate-600">Current Weight</dt>
+							<dd class="text-slate-900 font-semibold">
+								<% if (viewedUser.currentWeight) { %>
+									<%= viewedUser.currentWeight %> <%= viewedUser.unitSystem === 'METRIC' ? 'kg' : 'lbs' %>
+								<% } else { %>
+									Not set
+								<% } %>
+							</dd>
+						</div>
+						<div>
+							<dt class="text-sm text-slate-600">Goal Weight</dt>
+							<dd class="text-slate-900 font-semibold">
+								<% if (viewedUser.goalWeight) { %>
+									<%= viewedUser.goalWeight %> <%= viewedUser.unitSystem === 'METRIC' ? 'kg' : 'lbs' %>
+								<% } else { %>
+									Not set
+								<% } %>
+							</dd>
+						</div>
+						<div>
+							<dt class="text-sm text-slate-600">Height</dt>
+							<dd class="text-slate-900 font-semibold">
+								<% if (viewedUser.height) { %>
+									<%= viewedUser.height %> <%= viewedUser.unitSystem === 'METRIC' ? 'cm' : 'in' %>
+								<% } else { %>
+									Not set
+								<% } %>
+							</dd>
+						</div>
+						<div>
+							<dt class="text-sm text-slate-600">Weight Entries</dt>
+							<dd class="text-slate-900 font-semibold"><%= viewedUser._count.weightEntries %></dd>
+						</div>
+					</dl>
+				</div>
+
+				<!-- Teams -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<h2 class="text-xl font-semibold text-slate-900 mb-4">Teams (<%= viewedUser._count.teamMemberships %>)</h2>
+					<% if (viewedUser.teamMemberships.length > 0) { %>
+						<div class="space-y-2">
+							<% viewedUser.teamMemberships.forEach(membership => { %>
+								<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+									<div>
+										<div class="font-medium text-slate-900"><%= membership.team.name %></div>
+										<div class="text-sm text-slate-600">
+											<%= membership.role %> • Joined <%= new Date(membership.joinedAt).toLocaleDateString() %>
+										</div>
+									</div>
+									<a href="/teams/<%= membership.team.id %>" class="text-teal-600 hover:underline text-sm">View</a>
+								</div>
+							<% }) %>
+						</div>
+					<% } else { %>
+						<p class="text-slate-600">Not a member of any teams</p>
+					<% } %>
+				</div>
+			</div>
+
+			<!-- Actions Sidebar -->
+			<div class="space-y-6">
+				<!-- Account Status -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<h3 class="font-semibold text-slate-900 mb-4">Account Status</h3>
+					<div class="space-y-3">
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-slate-600">Active</span>
+							<span class="<%= viewedUser.isActive ? 'text-green-600' : 'text-red-600' %>">
+								<%= viewedUser.isActive ? 'Yes' : 'No' %>
+							</span>
+						</div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-slate-600">Email Verified</span>
+							<span class="<%= viewedUser.emailVerified ? 'text-green-600' : 'text-yellow-600' %>">
+								<%= viewedUser.emailVerified ? 'Yes' : 'No' %>
+							</span>
+						</div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-slate-600">Administrator</span>
+							<span class="<%= viewedUser.isAdmin ? 'text-purple-600' : 'text-slate-600' %>">
+								<%= viewedUser.isAdmin ? 'Yes' : 'No' %>
+							</span>
+						</div>
+						<div>
+							<div class="text-sm text-slate-600 mb-1">Last Login</div>
+							<div class="text-slate-900 text-sm">
+								<% if (viewedUser.lastLoginAt) { %>
+									<%= new Date(viewedUser.lastLoginAt).toLocaleString() %>
+								<% } else { %>
+									Never
+								<% } %>
+							</div>
+						</div>
+						<div>
+							<div class="text-sm text-slate-600 mb-1">Joined</div>
+							<div class="text-slate-900 text-sm">
+								<%= new Date(viewedUser.createdAt).toLocaleString() %>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Admin Actions -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<h3 class="font-semibold text-slate-900 mb-4">Admin Actions</h3>
+					<div class="space-y-2">
+						<button
+							@click="showResetPasswordModal = true"
+							class="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors">
+							Reset Password
+						</button>
+						<% if (!viewedUser.emailVerified) { %>
+							<button
+								@click="resendVerification"
+								class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
+								Resend Verification Email
+							</button>
+						<% } %>
+						<button
+							@click="toggleAdmin"
+							class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+							<%= viewedUser.isAdmin ? 'Remove' : 'Grant' %> Admin
+						</button>
+						<button
+							@click="toggleActive"
+							class="w-full px-4 py-2 <%= viewedUser.isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' %> text-white rounded-lg transition-colors">
+							<%= viewedUser.isActive ? 'Deactivate' : 'Activate' %> Account
+						</button>
+						<% if (!viewedUser.isAdmin) { %>
+							<hr class="my-3 border-slate-200">
+							<button
+								@click="deleteUser"
+								class="w-full px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-lg transition-colors font-medium">
+								Delete User Permanently
+							</button>
+						<% } %>
+					</div>
+				</div>
+
+				<!-- Activity Stats -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<h3 class="font-semibold text-slate-900 mb-4">Activity</h3>
+					<dl class="space-y-2">
+						<div class="flex justify-between">
+							<dt class="text-sm text-slate-600">Posts</dt>
+							<dd class="font-semibold text-slate-900"><%= viewedUser._count.posts %></dd>
+						</div>
+						<div class="flex justify-between">
+							<dt class="text-sm text-slate-600">Comments</dt>
+							<dd class="font-semibold text-slate-900"><%= viewedUser._count.comments %></dd>
+						</div>
+						<div class="flex justify-between">
+							<dt class="text-sm text-slate-600">Teams Owned</dt>
+							<dd class="font-semibold text-slate-900"><%= viewedUser._count.ownedTeams %></dd>
+						</div>
+					</dl>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<!-- Reset Password Modal -->
+	<div x-show="showResetPasswordModal"
+		x-cloak
+		@click.away="showResetPasswordModal = false"
+		class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+		<div @click.stop class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+			<h2 class="text-xl font-bold text-slate-900 mb-4">Reset User Password</h2>
+			<p class="text-slate-600 mb-4 text-sm">
+				This will reset the password for <strong><%= viewedUser.username %></strong> and log them out of all sessions.
+			</p>
+			<form @submit.prevent="resetPassword" class="space-y-4">
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						New Password
+					</label>
+					<input
+						type="password"
+						x-model="newPassword"
+						required
+						minlength="8"
+						placeholder="Minimum 8 characters"
+						class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900">
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						Confirm Password
+					</label>
+					<input
+						type="password"
+						x-model="confirmPassword"
+						required
+						minlength="8"
+						placeholder="Re-enter password"
+						class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900">
+				</div>
+				<div class="flex gap-3 pt-4">
+					<button
+						type="button"
+						@click="showResetPasswordModal = false"
+						class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+						Cancel
+					</button>
+					<button
+						type="submit"
+						class="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors">
+						Reset Password
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

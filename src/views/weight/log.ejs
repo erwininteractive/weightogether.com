@@ -1,0 +1,186 @@
+<div class="max-w-2xl mx-auto">
+	<div class="bg-white rounded-lg shadow p-6">
+		<div class="flex items-center justify-between mb-6">
+			<h1 class="text-2xl font-bold text-slate-800"><%= title %></h1>
+			<a href="/progress" class="text-gray-500 hover:text-gray-700">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</a>
+		</div>
+
+		<% if (errors && errors.length > 0) { %>
+			<div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+				<ul class="list-disc list-inside">
+					<% errors.forEach(error => { %>
+						<li><%= error.msg %></li>
+					<% }); %>
+				</ul>
+			</div>
+		<% } %>
+
+		<form action="/progress/log" method="POST" enctype="multipart/form-data" class="space-y-6">
+			<% if (entry) { %>
+				<input type="hidden" name="entryId" value="<%= entry.id %>">
+			<% } %>
+
+			<!-- Weight and Date -->
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label for="weight" class="block text-sm font-medium text-gray-700 mb-1">
+						Weight (<%= user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %>) *
+					</label>
+					<input type="number" id="weight" name="weight" step="0.1" min="0.1" max="1000" required
+						value="<%= formData.weight || '' %>"
+						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+						placeholder="Enter weight">
+				</div>
+
+				<div>
+					<label for="recordedAt" class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+					<input type="date" id="recordedAt" name="recordedAt" required
+						value="<%= formData.recordedAt ? (typeof formData.recordedAt === 'string' ? formData.recordedAt : new Date(formData.recordedAt).toISOString().split('T')[0]) : new Date().toISOString().split('T')[0] %>"
+						class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+					<p class="text-xs text-gray-500 mt-1">You can log weight for any date</p>
+				</div>
+			</div>
+
+			<!-- Body Composition (Optional) -->
+			<div class="border-t border-gray-200 pt-6">
+				<h2 class="text-lg font-semibold text-slate-700 mb-4">Body Composition (Optional)</h2>
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<div>
+						<label for="bodyFatPercentage" class="block text-sm font-medium text-gray-700 mb-1">Body Fat %</label>
+						<input type="number" id="bodyFatPercentage" name="bodyFatPercentage" step="0.1" min="0" max="100"
+							value="<%= formData.bodyFatPercentage || '' %>"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+							placeholder="e.g., 25.5">
+					</div>
+
+					<div>
+						<label for="muscleMass" class="block text-sm font-medium text-gray-700 mb-1">
+							Muscle Mass (<%= user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %>)
+						</label>
+						<input type="number" id="muscleMass" name="muscleMass" step="0.1" min="0" max="500"
+							value="<%= formData.muscleMass || '' %>"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+							placeholder="e.g., 120">
+					</div>
+
+					<div>
+						<label for="waterPercentage" class="block text-sm font-medium text-gray-700 mb-1">Water %</label>
+						<input type="number" id="waterPercentage" name="waterPercentage" step="0.1" min="0" max="100"
+							value="<%= formData.waterPercentage || '' %>"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+							placeholder="e.g., 55">
+					</div>
+				</div>
+			</div>
+
+			<!-- Notes -->
+			<div>
+				<label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+				<textarea id="notes" name="notes" rows="3" maxlength="1000"
+					class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+					placeholder="How are you feeling? Any observations?"><%= formData.notes || '' %></textarea>
+				<p class="text-xs text-gray-500 mt-1">Max 1000 characters</p>
+			</div>
+
+			<!-- Photos -->
+			<div class="border-t border-gray-200 pt-6">
+				<h2 class="text-lg font-semibold text-slate-700 mb-4">Progress Photos</h2>
+				
+				<% if (entry && entry.photos && entry.photos.length > 0) { %>
+					<div class="mb-4">
+						<p class="text-sm text-gray-600 mb-2">Existing photos (manage visibility in the gallery view):</p>
+						<div class="flex gap-2 flex-wrap">
+							<% entry.photos.forEach((photo, index) => { %>
+								<div class="relative">
+									<img src="<%= photo.url %>" alt="Progress photo" class="w-24 h-24 object-cover rounded-lg border">
+									<!-- Visibility indicator -->
+									<span class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-xs font-medium
+										<% if (photo.visibility === 'PUBLIC') { %>bg-green-100 text-green-700
+										<% } else if (photo.visibility === 'TEAM') { %>bg-blue-100 text-teal-700
+										<% } else { %>bg-gray-100 text-gray-600<% } %>">
+										<% if (photo.visibility === 'PUBLIC') { %>Public
+										<% } else if (photo.visibility === 'TEAM') { %>Team
+										<% } else { %>Private<% } %>
+									</span>
+								</div>
+							<% }); %>
+						</div>
+					</div>
+				<% } %>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div>
+						<label for="photos" class="block text-sm font-medium text-gray-700 mb-1">
+							<%= entry ? 'Add more photos' : 'Upload photos' %>
+						</label>
+						<input type="file" id="photos" name="photos" accept="image/*" multiple
+							class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-teal-700 hover:file:bg-blue-100">
+						<p class="text-xs text-gray-500 mt-1">Max 3 photos, up to 10MB each. JPEG, PNG, WebP, or GIF.</p>
+					</div>
+					
+					<div>
+						<label for="photoVisibility" class="block text-sm font-medium text-gray-700 mb-1">Photo visibility</label>
+						<select id="photoVisibility" name="photoVisibility"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+							<% visibilityOptions.forEach(v => { %>
+								<option value="<%= v.value %>" <%= (formData.visibility || 'PRIVATE') === v.value ? 'selected' : '' %>><%= v.label %></option>
+							<% }); %>
+						</select>
+						<p class="text-xs text-gray-500 mt-1">You can change each photo's visibility later</p>
+					</div>
+				</div>
+
+				<!-- Preview selected files -->
+				<div id="photoPreview" class="flex gap-2 flex-wrap mt-4"></div>
+			</div>
+
+			<!-- Visibility -->
+			<div>
+				<label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+				<select id="visibility" name="visibility"
+					class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+					<% visibilityOptions.forEach(v => { %>
+						<option value="<%= v.value %>" <%= (formData.visibility || 'PRIVATE') === v.value ? 'selected' : '' %>><%= v.label %></option>
+					<% }); %>
+				</select>
+			</div>
+
+			<!-- Submit Buttons -->
+			<div class="flex justify-end gap-4 pt-4 border-t border-gray-200">
+				<a href="/progress" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+					Cancel
+				</a>
+				<button type="submit" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+					<%= entry ? 'Update Entry' : 'Log Weight' %>
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script>
+	// Preview selected photos
+	document.getElementById('photos').addEventListener('change', function(e) {
+		const preview = document.getElementById('photoPreview');
+		preview.innerHTML = '';
+		
+		const files = e.target.files;
+		for (let i = 0; i < files.length && i < 3; i++) {
+			const file = files[i];
+			if (file.type.startsWith('image/')) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					const img = document.createElement('img');
+					img.src = e.target.result;
+					img.className = 'w-24 h-24 object-cover rounded-lg border';
+					preview.appendChild(img);
+				};
+				reader.readAsDataURL(file);
+			}
+		}
+	});
+</script>

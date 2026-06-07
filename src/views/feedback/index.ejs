@@ -1,0 +1,119 @@
+<div class="max-w-2xl mx-auto">
+	<div class="mb-8">
+		<h1 class="text-3xl font-bold text-gray-900 mb-2">Feedback</h1>
+		<p class="text-gray-600">
+			Have a suggestion, found a bug, or have a question? We'd love to hear from you!
+		</p>
+	</div>
+
+	<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+		<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+			<div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+				<div class="flex items-start gap-3">
+					<svg class="w-5 h-5 text-red-600 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+					</svg>
+					<div>
+						<h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+						<ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+							<% errors.forEach(function(error) { %>
+								<li><%= error.msg %></li>
+							<% }); %>
+						</ul>
+					</div>
+				</div>
+			</div>
+		<% } %>
+
+		<form action="/feedback" method="POST" class="space-y-6">
+			<!-- Feedback Type -->
+			<div>
+				<label for="type" class="block text-sm font-medium text-gray-700 mb-2">
+					Type <span class="text-red-500">*</span>
+				</label>
+				<select
+					id="type"
+					name="type"
+					required
+					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+				>
+					<option value="" disabled <%= typeof formData === 'undefined' || !formData.type ? 'selected' : '' %>>Select a type...</option>
+					<option value="bug" <%= typeof formData !== 'undefined' && formData.type === 'bug' ? 'selected' : '' %>>Bug Report</option>
+					<option value="feature" <%= typeof formData !== 'undefined' && formData.type === 'feature' ? 'selected' : '' %>>Feature Request</option>
+					<option value="question" <%= typeof formData !== 'undefined' && formData.type === 'question' ? 'selected' : '' %>>Question</option>
+					<option value="other" <%= typeof formData !== 'undefined' && formData.type === 'other' ? 'selected' : '' %>>Other</option>
+				</select>
+			</div>
+
+			<!-- Subject -->
+			<div>
+				<label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
+					Subject <span class="text-red-500">*</span>
+				</label>
+				<input
+					type="text"
+					id="subject"
+					name="subject"
+					required
+					minlength="5"
+					maxlength="200"
+					placeholder="Brief summary of your feedback"
+					value="<%= typeof formData !== 'undefined' && formData.subject ? formData.subject : '' %>"
+					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+				>
+				<p class="mt-1 text-xs text-gray-500">5-200 characters</p>
+			</div>
+
+			<!-- Message -->
+			<div>
+				<label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+					Message <span class="text-red-500">*</span>
+				</label>
+				<textarea
+					id="message"
+					name="message"
+					required
+					minlength="20"
+					maxlength="5000"
+					rows="6"
+					placeholder="Please describe your feedback in detail. For bug reports, include steps to reproduce the issue."
+					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-y"
+				><%= typeof formData !== 'undefined' && formData.message ? formData.message : '' %></textarea>
+				<p class="mt-1 text-xs text-gray-500">20-5000 characters</p>
+			</div>
+
+			<!-- User Info (read-only) -->
+			<div class="bg-gray-50 rounded-lg p-4">
+				<p class="text-sm text-gray-600">
+					<strong>Submitting as:</strong> <%= user.username %> (<%= user.email %>)
+				</p>
+				<p class="text-xs text-gray-500 mt-1">
+					We'll use this email to respond to your feedback if needed.
+				</p>
+			</div>
+
+			<!-- Submit Button -->
+			<div class="flex items-center justify-between pt-4">
+				<a href="/dashboard" class="text-gray-600 hover:text-gray-800 font-medium">
+					Cancel
+				</a>
+				<button
+					type="submit"
+					class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors"
+				>
+					Submit Feedback
+				</button>
+			</div>
+		</form>
+	</div>
+
+	<!-- Tips -->
+	<div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+		<h3 class="text-sm font-medium text-blue-900 mb-2">Tips for helpful feedback:</h3>
+		<ul class="text-sm text-blue-800 space-y-1">
+			<li><strong>Bug reports:</strong> Include steps to reproduce, what you expected, and what happened instead.</li>
+			<li><strong>Feature requests:</strong> Describe the problem you're trying to solve and your proposed solution.</li>
+			<li><strong>Questions:</strong> Be specific about what you need help with.</li>
+		</ul>
+	</div>
+</div>

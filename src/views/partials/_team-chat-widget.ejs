@@ -1,0 +1,308 @@
+<%# Team Chat Widget - Floating chat button and expandable panel %>
+<%# Required variables: teamId, teamName, currentUserId %>
+
+<div x-data="teamChatWidget('<%= teamId %>', '<%= currentUserId %>')" x-init="init()" class="fixed bottom-6 right-6 z-50">
+    <!-- Chat Panel (Desktop: slide-up, Mobile: full-screen) -->
+    <div
+        x-show="isOpen"
+        x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-4 lg:translate-y-4"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-4 lg:translate-y-4"
+        class="fixed inset-0 lg:inset-auto lg:absolute lg:bottom-16 lg:right-0 lg:w-96 lg:h-[500px] bg-white lg:rounded-xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
+    >
+        <!-- Header -->
+        <div class="bg-teal-600 text-white px-4 py-3 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm"><%= teamName %> Chat</h3>
+                    <p class="text-xs text-teal-100" x-show="messages.length > 0" x-text="messages.length + ' messages'"></p>
+                </div>
+            </div>
+            <button
+                @click="close()"
+                class="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                aria-label="Close chat"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div
+            x-ref="messagesContainer"
+            class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"
+        >
+            <!-- Loading State -->
+            <div x-show="loading" class="flex items-center justify-center h-full">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div x-show="!loading && messages.length === 0" class="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <p class="text-sm">No messages yet</p>
+                <p class="text-xs mt-1">Start the conversation!</p>
+            </div>
+
+            <!-- Messages List -->
+            <template x-for="msg in messages" :key="msg.id">
+                <div :class="msg.sender.id === currentUserId ? 'flex justify-end' : 'flex justify-start'">
+                    <div :class="msg.sender.id === currentUserId ? 'flex-row-reverse' : ''" class="flex gap-2 max-w-[85%]">
+                        <!-- Avatar (only for others) -->
+                        <template x-if="msg.sender.id !== currentUserId">
+                            <div class="shrink-0 self-end">
+                                <template x-if="msg.sender.avatarUrl">
+                                    <img :src="msg.sender.avatarUrl" :alt="msg.sender.username" class="w-7 h-7 rounded-full object-cover">
+                                </template>
+                                <template x-if="!msg.sender.avatarUrl">
+                                    <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center text-white text-xs font-bold" x-text="msg.sender.username.charAt(0).toUpperCase()"></div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Message Bubble -->
+                        <div :class="msg.sender.id === currentUserId ? 'bg-teal-600 text-white' : 'bg-white border border-gray-200'" class="rounded-2xl px-3 py-2 shadow-sm">
+                            <!-- Sender name (for others in group) -->
+                            <template x-if="msg.sender.id !== currentUserId">
+                                <p class="text-xs font-medium text-teal-600 mb-0.5" x-text="msg.sender.username"></p>
+                            </template>
+                            <p class="text-sm whitespace-pre-wrap break-words" x-text="msg.content"></p>
+                            <p :class="msg.sender.id === currentUserId ? 'text-teal-200' : 'text-gray-400'" class="text-xs mt-0.5" x-text="formatTime(msg.createdAt)"></p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Input Area -->
+        <div class="border-t border-gray-200 p-3 bg-white shrink-0">
+            <form @submit.prevent="sendMessage()" class="flex gap-2">
+                <input
+                    type="text"
+                    x-model="newMessage"
+                    @keydown.enter.prevent="sendMessage()"
+                    placeholder="Type a message..."
+                    maxlength="5000"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                    :disabled="sending"
+                >
+                <button
+                    type="submit"
+                    :disabled="!newMessage.trim() || sending"
+                    class="p-2 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Button -->
+    <button
+        @click="toggle()"
+        class="w-14 h-14 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+        :class="isOpen ? 'lg:hidden' : ''"
+        aria-label="Toggle team chat"
+    >
+        <!-- Chat Icon -->
+        <svg x-show="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+        <!-- Close Icon (mobile only when open) -->
+        <svg x-show="isOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+
+        <!-- Unread Badge -->
+        <span
+            x-show="unreadCount > 0 && !isOpen"
+            x-cloak
+            class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
+            x-text="unreadCount > 9 ? '9+' : unreadCount"
+        ></span>
+    </button>
+</div>
+
+<script>
+function teamChatWidget(teamId, currentUserId) {
+    return {
+        teamId: teamId,
+        currentUserId: currentUserId,
+        isOpen: false,
+        loading: false,
+        sending: false,
+        messages: [],
+        newMessage: '',
+        unreadCount: 0,
+        conversationId: null,
+        initialized: false,
+
+        async init() {
+            // Fetch initial unread count
+            await this.fetchUnreadCount();
+
+            // Listen for new messages via Socket.io
+            this.setupSocketListener();
+        },
+
+        setupSocketListener() {
+            // Listen for the global newMessage event
+            window.addEventListener('wlt:newMessage', (event) => {
+                const data = event.detail;
+                // Check if this message is for our team conversation
+                if (this.conversationId && data.message.conversationId === this.conversationId) {
+                    // Check if message already exists (prevent duplicates)
+                    const exists = this.messages.some(m => m.id === data.message.id);
+                    if (exists) return;
+
+                    // Add message to list if chat is open
+                    if (this.isOpen) {
+                        this.messages.push(data.message);
+                        this.$nextTick(() => this.scrollToBottom());
+                        // Mark as read since chat is open
+                        this.markAsRead();
+                    } else {
+                        // Increment unread count
+                        this.unreadCount++;
+                    }
+                }
+            });
+        },
+
+        async toggle() {
+            if (this.isOpen) {
+                this.close();
+            } else {
+                await this.open();
+            }
+        },
+
+        async open() {
+            this.isOpen = true;
+            if (!this.initialized) {
+                await this.loadMessages();
+                this.initialized = true;
+            }
+            this.$nextTick(() => this.scrollToBottom());
+            // Mark as read when opening
+            if (this.conversationId) {
+                this.markAsRead();
+            }
+        },
+
+        close() {
+            this.isOpen = false;
+        },
+
+        async loadMessages() {
+            this.loading = true;
+            try {
+                const response = await fetch(`/messages/team/${this.teamId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    this.messages = data.messages || [];
+                    this.conversationId = data.conversationId;
+                    this.unreadCount = 0; // Reset since we're viewing
+                }
+            } catch (error) {
+                console.error('Failed to load messages:', error);
+            }
+            this.loading = false;
+        },
+
+        async fetchUnreadCount() {
+            try {
+                const response = await fetch(`/messages/team/${this.teamId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    this.unreadCount = data.unreadCount || 0;
+                    this.conversationId = data.conversationId;
+                }
+            } catch (error) {
+                console.error('Failed to fetch unread count:', error);
+            }
+        },
+
+        async sendMessage() {
+            if (!this.newMessage.trim() || this.sending) return;
+
+            this.sending = true;
+            const content = this.newMessage;
+            this.newMessage = '';
+
+            try {
+                const response = await fetch(`/messages/team/${this.teamId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Add message to list
+                    this.messages.push(data.message);
+                    this.$nextTick(() => this.scrollToBottom());
+                } else {
+                    // Restore message on error
+                    this.newMessage = content;
+                    console.error('Failed to send message');
+                }
+            } catch (error) {
+                this.newMessage = content;
+                console.error('Failed to send message:', error);
+            }
+
+            this.sending = false;
+        },
+
+        async markAsRead() {
+            if (!this.conversationId) return;
+            try {
+                await fetch(`/messages/team/${this.teamId}/read`, {
+                    method: 'POST',
+                });
+                this.unreadCount = 0;
+            } catch (error) {
+                console.error('Failed to mark as read:', error);
+            }
+        },
+
+        scrollToBottom() {
+            const container = this.$refs.messagesContainer;
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        },
+
+        formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const isToday = date.toDateString() === now.toDateString();
+
+            if (isToday) {
+                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            } else {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+                       date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            }
+        }
+    };
+}
+</script>

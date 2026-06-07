@@ -1,0 +1,498 @@
+<div class="space-y-6" x-data="{
+	showInviteModal: false,
+	inviteCode: `<%= team.inviteCode %>`,
+	showNewPostModal: false,
+	newPost: { type: 'GENERAL', content: '', title: '' },
+	submitting: false,
+	async submitPost() {
+		if (!this.newPost.content.trim()) {
+			alert('Please enter post content');
+			return;
+		}
+
+		this.submitting = true;
+
+		try {
+			const response = await fetch(`/teams/<%= team.id %>/posts`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: this.newPost.type,
+					title: this.newPost.title || null,
+					content: this.newPost.content,
+				}),
+			});
+
+			if (response.redirected) {
+				window.location.href = response.url;
+			} else {
+				const data = await response.json();
+				if (data.success) {
+					window.location.reload();
+				} else {
+					alert(data.message || 'Failed to create post');
+					this.submitting = false;
+				}
+			}
+		} catch (error) {
+			console.error('Error creating post:', error);
+			alert('An error occurred while creating the post');
+			this.submitting = false;
+		}
+	}
+}">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+        <a href="/teams" class="inline-flex items-center gap-1 text-gray-600 hover:text-gray-900 sm:hidden">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Teams
+        </a>
+        <div class="flex items-start gap-4 flex-1">
+            <% if (team.avatarUrl) { %>
+                <img src="<%= team.avatarUrl %>" alt="<%= team.name %>" class="w-16 h-16 rounded-lg object-cover">
+            <% } else { %>
+                <div class="w-16 h-16 rounded-lg bg-purple-500 flex items-center justify-center text-white text-2xl font-bold shrink-0">
+                    <%= team.name.charAt(0).toUpperCase() %>
+                </div>
+            <% } %>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-bold text-slate-800 truncate"><%= team.name %></h1>
+                    <% if (!team.isPublic) { %>
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Private
+                        </span>
+                    <% } %>
+                </div>
+                <% if (team.description) { %>
+                    <p class="text-gray-600 mt-1"><%= team.description %></p>
+                <% } %>
+                <p class="text-sm text-gray-500 mt-2">
+                    <%= team._count.members %> member<%= team._count.members !== 1 ? 's' : '' %>
+                    <span class="mx-1">-</span>
+                    Created by @<%= team.owner.username %>
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2 shrink-0">
+            <a href="/teams" class="hidden sm:inline-flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back
+            </a>
+            <% if (isAdmin) { %>
+                <a href="/teams/<%= team.id %>/edit" class="inline-flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Settings
+                </a>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <% if (success) { %>
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <%= success %>
+        </div>
+    <% } %>
+    <% if (error) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Members List -->
+			<!-- Team Feed (for members only) -->
+			<% if (isMember) { %>
+				<div class="bg-white rounded-lg shadow mb-6">
+					<div class="p-6 border-b border-gray-100">
+						<h2 class="text-lg font-semibold text-slate-800">Team Feed</h2>
+					</div>
+					<div class="p-6 space-y-4">
+						<!-- New Post Button -->
+						<button
+							@click="showNewPostModal = true"
+							class="w-full bg-white rounded-lg shadow-sm p-4 border border-slate-200 hover:border-teal-500 transition-colors text-left group">
+							<div class="flex items-center gap-3">
+								<% if (user.avatarUrl) { %>
+									<img src="<%= user.avatarUrl %>" alt="<%= user.displayName || user.username %>" class="w-10 h-10 rounded-full">
+								<% } else { %>
+									<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+										<span class="text-sm font-bold text-teal-600">
+											<%= (user.displayName || user.username).charAt(0).toUpperCase() %>
+										</span>
+									</div>
+								<% } %>
+								<span class="text-slate-500 group-hover:text-slate-700">
+									Share something with your team...
+								</span>
+							</div>
+						</button>
+
+						<!-- Posts List -->
+						<div class="space-y-4 mt-4">
+							<% if (posts && posts.length > 0) { %>
+								<% posts.forEach(function(post) { %>
+									<%- include('../posts/_post-card', { post: post, user: user, userRole: userRole }) %>
+								<% }); %>
+							<% } else { %>
+								<!-- Empty State -->
+								<div class="text-center py-8">
+									<svg class="w-12 h-12 text-slate-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+									</svg>
+									<h3 class="text-base font-semibold text-slate-900 mb-1">
+										No posts yet
+									</h3>
+									<p class="text-sm text-slate-600 mb-4">
+										Be the first to share something with your team!
+									</p>
+									<button
+										@click="showNewPostModal = true"
+										class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+										</svg>
+										Create First Post
+									</button>
+								</div>
+							<% } %>
+						</div>
+					</div>
+				</div>
+			<% } %>
+
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-slate-800">Members</h2>
+                    <span class="text-sm text-gray-500"><%= team._count.members %>/<%= team.maxMembers %></span>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    <% team.members.forEach(function(member) { %>
+                        <div class="flex items-center gap-4 p-4" x-data="{ showRoleMenu: false }">
+                            <% if (member.user.avatarUrl) { %>
+                                <img src="<%= member.user.avatarUrl %>" alt="<%= member.user.username %>" class="w-10 h-10 rounded-full object-cover">
+                            <% } else { %>
+                                <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold">
+                                    <%= (member.user.displayName || member.user.username).charAt(0).toUpperCase() %>
+                                </div>
+                            <% } %>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-gray-900 truncate"><%= member.user.displayName || member.user.username %></span>
+                                    <% if (member.role === 'OWNER') { %>
+                                        <span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">Owner</span>
+                                    <% } else if (member.role === 'ADMIN') { %>
+                                        <span class="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">Admin</span>
+                                    <% } else if (member.role === 'MODERATOR') { %>
+                                        <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">Moderator</span>
+                                    <% } %>
+                                </div>
+                                <p class="text-sm text-gray-500">@<%= member.user.username %></p>
+                            </div>
+                            
+                            <% if (member.user.weightVisible && member.user.currentWeight) { %>
+                                <div class="text-right hidden sm:block">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        <%= member.user.currentWeight %> <%= member.user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %>
+                                    </p>
+                                    <% if (member.user.goalWeight) { %>
+                                        <p class="text-xs text-gray-500">
+                                            Goal: <%= member.user.goalWeight %> <%= member.user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %>
+                                        </p>
+                                    <% } %>
+                                </div>
+                            <% } %>
+
+                            <% if (isAdmin && member.userId !== user.id && member.role !== 'OWNER') { %>
+                                <div class="relative" @click.away="showRoleMenu = false">
+                                    <button @click="showRoleMenu = !showRoleMenu" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                        </svg>
+                                    </button>
+                                    <div x-show="showRoleMenu" x-transition class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                                        <% roleOptions.forEach(function(option) { %>
+                                            <button 
+                                                @click="
+                                                    fetch('/teams/<%= team.id %>/members/<%= member.id %>/role', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ role: '<%= option.value %>' })
+                                                    }).then(() => location.reload());
+                                                    showRoleMenu = false;
+                                                "
+                                                class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 <%= member.role === option.value ? 'text-teal-600 font-medium' : 'text-gray-700' %>"
+                                            >
+                                                <%= option.label %>
+                                                <% if (member.role === option.value) { %>
+                                                    <svg class="w-4 h-4 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                <% } %>
+                                            </button>
+                                        <% }); %>
+                                        <div class="border-t border-gray-100 my-1"></div>
+                                        <form action="/teams/<%= team.id %>/members/<%= member.id %>/remove" method="POST">
+                                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                Remove from team
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Actions for Members -->
+            <% if (isMember) { %>
+                <div class="bg-white rounded-lg shadow p-6 space-y-4">
+                    <h3 class="font-semibold text-slate-800">Actions</h3>
+                    
+                    <a
+                        href="/teams/<%= team.id %>/challenges"
+                        class="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                        <div class="p-2 bg-purple-50 rounded-lg">
+                            <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">View Challenges</p>
+                            <p class="text-sm text-gray-500">Team competitions</p>
+                        </div>
+                    </a>
+
+                    <% if (isAdmin) { %>
+                        <button
+                            @click="showInviteModal = true"
+                            class="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-left"
+                        >
+                            <div class="p-2 bg-blue-50 rounded-lg">
+                                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Invite Members</p>
+                                <p class="text-sm text-gray-500">Share invite link</p>
+                            </div>
+                        </button>
+                    <% } %>
+
+                    <% if (!isOwner) { %>
+                        <form action="/teams/<%= team.id %>/leave" method="POST" onsubmit="return confirm('Are you sure you want to leave this team?')">
+                            <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:bg-red-50 transition-colors text-left">
+                                <div class="p-2 bg-red-50 rounded-lg">
+                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-red-700">Leave Team</p>
+                                    <p class="text-sm text-red-500">Remove yourself</p>
+                                </div>
+                            </button>
+                        </form>
+                    <% } %>
+
+                    <% if (isOwner) { %>
+                        <form action="/teams/<%= team.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this team? This action cannot be undone.')">
+                            <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:bg-red-50 transition-colors text-left">
+                                <div class="p-2 bg-red-50 rounded-lg">
+                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-red-700">Delete Team</p>
+                                    <p class="text-sm text-red-500">Permanently remove</p>
+                                </div>
+                            </button>
+                        </form>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <!-- Join button for non-members viewing public team -->
+                <% if (team.isPublic) { %>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold text-slate-800 mb-4">Join This Team</h3>
+                        <form action="/teams/<%= team.id %>/join" method="POST">
+                            <button type="submit" class="w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium">
+                                Join Team
+                            </button>
+                        </form>
+                    </div>
+                <% } %>
+            <% } %>
+
+            <!-- Team Stats -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="font-semibold text-slate-800 mb-4">Team Stats</h3>
+                <dl class="space-y-3">
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500">Members</dt>
+                        <dd class="font-medium text-gray-900"><%= team._count.members %>/<%= team.maxMembers %></dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500">Challenges</dt>
+                        <dd class="font-medium text-gray-900"><%= team._count.challenges %></dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500">Created</dt>
+                        <dd class="font-medium text-gray-900"><%= new Date(team.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite Modal -->
+    <div x-show="showInviteModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+        <div class="fixed inset-0 bg-black/50" @click="showInviteModal = false"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">Invite Members</h3>
+                <button @click="showInviteModal = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-gray-600 mb-4">Share this link to invite people to join your team:</p>
+            <div class="flex gap-2 mb-4">
+                <input 
+                    type="text" 
+                    readonly
+                    :value="window.location.origin + '/teams/join/' + inviteCode"
+                    class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-900"
+                >
+                <button 
+                    @click="navigator.clipboard.writeText(window.location.origin + '/teams/join/' + inviteCode); $el.textContent = 'Copied!'; setTimeout(() => $el.textContent = 'Copy', 2000)"
+                    class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
+                >
+                    Copy
+                </button>
+            </div>
+            <% if (isAdmin) { %>
+                <button 
+                    @click="
+                        fetch('/teams/<%= team.id %>/regenerate-invite', { method: 'POST' })
+                            .then(r => r.json())
+                            .then(data => { if(data.inviteCode) inviteCode = data.inviteCode });
+                    "
+                    class="text-sm text-gray-500 hover:text-gray-700"
+                >
+                    Regenerate invite link
+                </button>
+            <% } %>
+        </div>
+    </div>
+
+	<!-- New Post Modal -->
+	<div x-show="showNewPostModal"
+		x-cloak
+		@click.away="showNewPostModal = false"
+		class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+		<div @click.stop class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+			<div class="p-6 border-b border-slate-200">
+				<div class="flex items-center justify-between">
+					<h2 class="text-xl font-bold text-slate-900">Create Post</h2>
+					<button @click="showNewPostModal = false" class="text-slate-400 hover:text-slate-600">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<form @submit.prevent="submitPost" class="p-6 space-y-4">
+				<!-- Post Type -->
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						Post Type
+					</label>
+					<select x-model="newPost.type" class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900">
+						<option value="GENERAL">General Update</option>
+						<option value="MILESTONE">Milestone</option>
+						<option value="TIP">Tip/Advice</option>
+						<option value="QUESTION">Question</option>
+						<option value="RECIPE">Recipe</option>
+						<option value="WORKOUT">Workout</option>
+					</select>
+				</div>
+
+				<!-- Title (Optional) -->
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						Title <span class="text-slate-500">(optional)</span>
+					</label>
+					<input
+						type="text"
+						x-model="newPost.title"
+						maxlength="200"
+						placeholder="Give your post a title..."
+						class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900">
+				</div>
+
+				<!-- Content -->
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						Content <span class="text-red-500">*</span>
+					</label>
+					<textarea
+						x-model="newPost.content"
+						rows="6"
+						maxlength="5000"
+						required
+						placeholder="Share your thoughts..."
+						class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 resize-none"></textarea>
+					<p class="text-xs text-slate-500 mt-1">
+						<span x-text="newPost.content.length"></span>/5000 characters
+					</p>
+				</div>
+
+				<!-- Actions -->
+				<div class="flex gap-3 pt-4">
+					<button
+						type="button"
+						@click="showNewPostModal = false"
+						class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+						Cancel
+					</button>
+					<button
+					type="submit"
+					:disabled="submitting"
+					class="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+					<span x-text="submitting ? 'Posting...' : 'Post'"></span>
+				</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<%# Team Chat Widget - Only for team members %>
+<% if (isMember) { %>
+	<%- include('../partials/_team-chat-widget', { teamId: team.id, teamName: team.name, currentUserId: user.id }) %>
+<% } %>

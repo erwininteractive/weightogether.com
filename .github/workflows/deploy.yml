@@ -1,0 +1,103 @@
+name: Deploy to Production
+
+on:
+    push:
+        branches: [main]
+        workflow_dispatch: # Allow manual deployment
+
+jobs:
+    test:
+        name: Run Tests
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:16
+                env:
+                    POSTGRES_USER: testuser
+                    POSTGRES_PASSWORD: testpass
+                    POSTGRES_DB: testdb
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: 'npm'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Generate Prisma Client
+              env:
+                  DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb?schema=public
+              run: npx prisma generate
+
+            - name: Setup test database
+              env:
+                  DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb?schema=public
+              run: npx prisma db push --force-reset --accept-data-loss
+
+            - name: Run tests
+              env:
+                  DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb?schema=public
+                  NODE_ENV: test
+              run: npm test
+
+    deploy:
+        name: Deploy to Server
+        runs-on: ubuntu-latest
+        needs: test # Only deploy if tests pass
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup SSH
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+                  ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+            - name: Rsync files to server
+              run: |
+                  rsync -avz \
+                    -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+                    ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.DEPLOY_LOCATION }}
+
+            - name: Deploy application on server
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      export NVM_DIR="$HOME/.nvm"
+                      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                      nvm use 25
+                      cd ${{ secrets.DEPLOY_LOCATION }}
+                      npm ci
+                      npx prisma generate
+                      npx prisma migrate deploy
+                      npm run build
+                      mkdir -p public/uploads/avatars public/uploads/progress
+                      chmod 775 public/uploads public/uploads/avatars public/uploads/progress
+                      mkdir -p logs
+                      ~/.npm-global/bin/pm2 restart ${{ secrets.APP_NAME }} --update-env \
+                      || ~/.npm-global/bin/pm2 start ecosystem.config.js --only ${{ secrets.APP_NAME }}
+                      ~/.npm-global/bin/pm2 save
+
+            - name: Cleanup SSH
+              if: always()
+              run: rm -f ~/.ssh/deploy_key

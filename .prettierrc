@@ -1,0 +1,13 @@
+{
+	"tabWidth": 4,
+	"useTabs": true,
+	"overrides": [
+		{
+			"files": ["src/views/**/*.ejs"],
+			"options": {
+				"tabWidth": 4,
+				"useTabs": true
+			}
+		}
+	]
+}

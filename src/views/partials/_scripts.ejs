@@ -1,0 +1,317 @@
+<%# Global Scripts - Toast, Achievement, Confetti, Socket.io %>
+
+<!-- Alpine.js must load first -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+	// Initialize Alpine store and global helpers when Alpine is ready
+	document.addEventListener('alpine:init', () => {
+		// Toast notification store
+		Alpine.store('toasts', {
+			items: [],
+			nextId: 1,
+
+			addToast(message, type = 'info', duration = 5000) {
+				const id = this.nextId++;
+				const toast = {
+					id,
+					message,
+					type,
+					show: true
+				};
+
+				this.items.push(toast);
+
+				// Auto-remove after duration
+				if (duration > 0) {
+					setTimeout(() => {
+						this.removeToast(id);
+					}, duration);
+				}
+
+				return id;
+			},
+
+			removeToast(id) {
+				const index = this.items.findIndex(t => t.id === id);
+				if (index > -1) {
+					this.items[index].show = false;
+					// Remove from array after animation
+					setTimeout(() => {
+						this.items = this.items.filter(t => t.id !== id);
+					}, 200);
+				}
+			}
+		});
+
+		// Global toast helper functions (available after Alpine init)
+		window.toast = {
+			success: (message, duration = 5000) => {
+				Alpine.store('toasts').addToast(message, 'success', duration);
+			},
+			error: (message, duration = 5000) => {
+				Alpine.store('toasts').addToast(message, 'error', duration);
+			},
+			warning: (message, duration = 5000) => {
+				Alpine.store('toasts').addToast(message, 'warning', duration);
+			},
+			info: (message, duration = 5000) => {
+				Alpine.store('toasts').addToast(message, 'info', duration);
+			}
+		};
+
+		// Process server-side flash messages
+		<% if (typeof query !== 'undefined' && query) { %>
+			<% if (query.success) { %>
+				window.toast.success('<%= query.success %>');
+			<% } %>
+			<% if (query.error) { %>
+				window.toast.error('<%= query.error %>');
+			<% } %>
+			<% if (query.warning) { %>
+				window.toast.warning('<%= query.warning %>');
+			<% } %>
+			<% if (query.info) { %>
+				window.toast.info('<%= query.info %>');
+			<% } %>
+			<% if (query.achievements) { %>
+				// Parse achievements from query string
+				try {
+					const achievements = JSON.parse(decodeURIComponent('<%= query.achievements %>'));
+					achievements.forEach(achievement => {
+						setTimeout(() => {
+							window.showAchievement(achievement);
+						}, 1000);
+					});
+				} catch (e) {
+					console.error('Failed to parse achievements:', e);
+				}
+			<% } %>
+		<% } %>
+	});
+
+	// Achievement Celebration Component
+	function achievementCelebration() {
+		return {
+			achievements: [],
+			currentAchievement: null,
+			queueIndex: 0,
+
+			addAchievement(achievement) {
+				this.achievements.push(achievement);
+				if (!this.currentAchievement) {
+					this.showNext();
+				}
+			},
+
+			showNext() {
+				if (this.queueIndex < this.achievements.length) {
+					this.currentAchievement = this.achievements[this.queueIndex];
+					this.queueIndex++;
+					// Trigger confetti
+					window.launchConfetti();
+				} else {
+					this.currentAchievement = null;
+					this.achievements = [];
+					this.queueIndex = 0;
+				}
+			},
+
+			closeAchievement() {
+				this.currentAchievement = null;
+				// Show next achievement after a brief delay
+				setTimeout(() => {
+					this.showNext();
+				}, 500);
+			}
+		};
+	}
+
+	// Confetti Animation
+	window.launchConfetti = function() {
+		const canvas = document.getElementById('confetti-canvas');
+		if (!canvas) return;
+
+		const ctx = canvas.getContext('2d');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		const particles = [];
+		const particleCount = 150;
+		const colors = ['#FCD34D', '#FBBF24', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#3B82F6'];
+
+		class Particle {
+			constructor() {
+				this.x = Math.random() * canvas.width;
+				this.y = Math.random() * canvas.height - canvas.height;
+				this.size = Math.random() * 8 + 4;
+				this.speedY = Math.random() * 3 + 2;
+				this.speedX = Math.random() * 2 - 1;
+				this.color = colors[Math.floor(Math.random() * colors.length)];
+				this.rotation = Math.random() * 360;
+				this.rotationSpeed = Math.random() * 10 - 5;
+			}
+
+			update() {
+				this.y += this.speedY;
+				this.x += this.speedX;
+				this.rotation += this.rotationSpeed;
+
+				if (this.y > canvas.height) {
+					this.y = -10;
+					this.x = Math.random() * canvas.width;
+				}
+			}
+
+			draw() {
+				ctx.save();
+				ctx.translate(this.x, this.y);
+				ctx.rotate(this.rotation * Math.PI / 180);
+				ctx.fillStyle = this.color;
+				ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+				ctx.restore();
+			}
+		}
+
+		for (let i = 0; i < particleCount; i++) {
+			particles.push(new Particle());
+		}
+
+		let animationId;
+		let frameCount = 0;
+		const maxFrames = 180; // 3 seconds at 60fps
+
+		function animate() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			particles.forEach(particle => {
+				particle.update();
+				particle.draw();
+			});
+
+			frameCount++;
+			if (frameCount < maxFrames) {
+				animationId = requestAnimationFrame(animate);
+			} else {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+			}
+		}
+
+		animate();
+	};
+
+	// Global achievement helper
+	window.showAchievement = function(achievement) {
+		const event = new CustomEvent('achievement-unlocked', { detail: achievement });
+		window.dispatchEvent(event);
+	};
+
+	window.addEventListener('achievement-unlocked', (e) => {
+		// Find the Alpine component and add achievement
+		const celebrationEl = document.querySelector('[x-data*="achievementCelebration"]');
+		if (celebrationEl) {
+			const component = Alpine.$data(celebrationEl);
+			component.addAchievement(e.detail);
+		}
+	});
+</script>
+
+<!-- Socket.io Client for Real-time Notifications -->
+<% if (typeof user !== 'undefined' && user) { %>
+<script src="/socket.io/socket.io.js" onerror="window.socketIOLoadFailed=true"></script>
+<script>
+	// Real-time notification system
+	(function() {
+		let socket = null;
+		let socketEnabled = false;
+		let socketDisabled = false; // Permanently disabled after failure
+		const currentUserId = '<%= user.id %>';
+
+		function connectSocket() {
+			// Check if Socket.io loaded successfully
+			if (window.socketIOLoadFailed || typeof io === 'undefined') {
+				return;
+			}
+
+			// Don't retry if we've already failed
+			if (socketDisabled) {
+				return;
+			}
+
+			try {
+				// Connect to Socket.io server with auth
+				socket = io({
+					autoConnect: true,
+					reconnection: true,
+					reconnectionAttempts: 3,
+					reconnectionDelay: 1000,
+					timeout: 10000,
+					transports: ['polling', 'websocket'],
+					auth: {
+						userId: currentUserId
+					}
+				});
+
+				socket.on('connect', function() {
+					socketEnabled = true;
+				});
+
+				socket.on('authenticated', function(data) {
+					if (!data.success) {
+						// Auth failed, disable socket
+						socketDisabled = true;
+						socket.disconnect();
+					}
+				});
+
+				socket.on('newMessage', function(data) {
+					// Show toast notification (but not on messages pages)
+					const onMessagesPage = window.location.pathname.startsWith('/messages');
+					if (window.toast && data.message && !onMessagesPage) {
+						const preview = data.message.content && data.message.content.length > 50
+							? data.message.content.substring(0, 50) + '...'
+							: (data.message.content || 'New message');
+						window.toast.info(
+							`${data.conversationName || 'Message'}: ${preview}`,
+							8000
+						);
+					}
+
+					// Update unread badge if available
+					updateUnreadBadge();
+
+					// Dispatch custom event for other components (team chat widget uses this)
+					window.dispatchEvent(new CustomEvent('wlt:newMessage', {
+						detail: data
+					}));
+				});
+
+				socket.on('connect_error', function() {
+					// Connection failed - disable permanently to prevent spam
+					socketEnabled = false;
+					socketDisabled = true;
+					if (socket) {
+						socket.disconnect();
+					}
+				});
+
+				socket.on('disconnect', function() {
+					socketEnabled = false;
+				});
+			} catch (e) {
+				socketDisabled = true;
+			}
+		}
+
+		// Initialize on page load
+		document.addEventListener('DOMContentLoaded', function() {
+			connectSocket();
+		});
+
+		// Expose for external use
+		window.wltSocket = {
+			getSocket: () => socket
+		};
+	})();
+</script>
+<% } %>

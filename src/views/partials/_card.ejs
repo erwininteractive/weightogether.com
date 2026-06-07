@@ -1,0 +1,29 @@
+<%#
+Card Component
+Usage: <%- include('partials/_card', { title: 'Card Title', class: 'additional-classes' }) %>
+
+Parameters:
+- title: Card header title (optional)
+- class: Additional CSS classes for the card container (optional)
+- headerClass: Additional CSS classes for the header (optional)
+- bodyClass: Additional CSS classes for the body (optional)
+
+Note: Card body content should be passed via the 'body' local variable or rendered after include
+%>
+<%
+const extraClass = typeof locals.class !== 'undefined' ? locals.class : '';
+const headerExtraClass = typeof headerClass !== 'undefined' ? headerClass : '';
+const bodyExtraClass = typeof bodyClass !== 'undefined' ? bodyClass : '';
+%>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden <%= extraClass %>">
+	<% if (typeof title !== 'undefined' && title) { %>
+		<div class="px-6 py-4 border-b border-gray-200 <%= headerExtraClass %>">
+			<h2 class="text-lg font-semibold text-gray-900"><%= title %></h2>
+		</div>
+	<% } %>
+	<div class="p-6 <%= bodyExtraClass %>">
+		<% if (typeof body !== 'undefined') { %>
+			<%- body %>
+		<% } %>
+	</div>
+</div>

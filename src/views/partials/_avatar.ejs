@@ -1,0 +1,30 @@
+<%#
+Avatar Component
+Usage: <%- include('partials/_avatar', { user: user, size: 'md', class: 'additional-classes' }) %>
+
+Parameters:
+- user: Object with avatarUrl, displayName, and username properties
+- size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' (default: 'md')
+- class: Additional CSS classes (optional)
+%>
+<%
+const sizeClasses = {
+	xs: 'w-6 h-6 text-xs',
+	sm: 'w-8 h-8 text-sm',
+	md: 'w-10 h-10 text-sm',
+	lg: 'w-12 h-12 text-base',
+	xl: 'w-16 h-16 text-lg'
+};
+const avatarSize = typeof size !== 'undefined' ? size : 'md';
+const sizeClass = sizeClasses[avatarSize] || sizeClasses.md;
+const extraClass = typeof locals.class !== 'undefined' ? locals.class : '';
+const displayName = user.displayName || user.username || 'U';
+const initial = displayName.charAt(0).toUpperCase();
+%>
+<% if (user.avatarUrl) { %>
+	<img src="<%= user.avatarUrl %>" alt="<%= displayName %>" class="rounded-full object-cover <%= sizeClass %> <%= extraClass %>">
+<% } else { %>
+	<div class="rounded-full bg-teal-500 flex items-center justify-center text-white font-bold <%= sizeClass %> <%= extraClass %>">
+		<%= initial %>
+	</div>
+<% } %>

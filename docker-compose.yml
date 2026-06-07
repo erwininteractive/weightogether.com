@@ -1,0 +1,25 @@
+# Development Docker Compose - PostgreSQL Only
+# The application runs locally on your machine, only the database is containerized
+
+services:
+    db:
+        image: postgres:16-alpine
+        container_name: wlt-db-dev
+        ports:
+            - "5433:5432"
+        environment:
+            - POSTGRES_USER=devuser
+            - POSTGRES_PASSWORD=devpassword
+            - POSTGRES_DB=devdb
+        volumes:
+            - postgres_dev_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U devuser -d devdb"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        restart: unless-stopped
+
+volumes:
+    postgres_dev_data:
+        name: wlt_postgres_dev_data

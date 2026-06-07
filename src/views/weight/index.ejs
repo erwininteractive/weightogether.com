@@ -1,0 +1,463 @@
+<div class="space-y-6">
+	<!-- Header -->
+	<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+		<div>
+			<h1 class="text-2xl font-bold text-slate-800">Weight Progress</h1>
+			<p class="text-gray-600">Track your weight loss journey</p>
+		</div>
+		<a href="/progress/log" class="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+			</svg>
+			Log Weight
+		</a>
+	</div>
+
+	<% if (success) { %>
+		<div class="p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
+			<%= success %>
+		</div>
+	<% } %>
+
+	<% if (error) { %>
+		<div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+			<%= error %>
+		</div>
+	<% } %>
+
+	<!-- Stats Cards -->
+	<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+		<div class="bg-white p-4 rounded-lg shadow">
+			<p class="text-sm text-gray-500">Total Entries</p>
+			<p class="text-2xl font-bold text-slate-800"><%= stats.totalEntries %></p>
+		</div>
+		<div class="bg-white p-4 rounded-lg shadow">
+			<p class="text-sm text-gray-500">Starting Weight</p>
+			<p class="text-2xl font-bold text-slate-800">
+				<% if (stats.startWeight) { %>
+					<%= stats.startWeight.toFixed(1) %> <%= user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %>
+				<% } else { %>
+					<span class="text-gray-400">--</span>
+				<% } %>
+			</p>
+		</div>
+		<div class="bg-white p-4 rounded-lg shadow">
+			<p class="text-sm text-gray-500">Current Weight</p>
+			<p class="text-2xl font-bold text-slate-800">
+				<% if (stats.currentWeight) { %>
+					<%= stats.currentWeight.toFixed(1) %> <%= user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %>
+				<% } else { %>
+					<span class="text-gray-400">--</span>
+				<% } %>
+			</p>
+		</div>
+		<div class="bg-white p-4 rounded-lg shadow">
+			<p class="text-sm text-gray-500">Total Change</p>
+			<p class="text-2xl font-bold <%= stats.totalChange !== null && stats.totalChange < 0 ? 'text-green-600' : stats.totalChange !== null && stats.totalChange > 0 ? 'text-red-600' : 'text-slate-800' %>">
+				<% if (stats.totalChange !== null) { %>
+					<%= stats.totalChange > 0 ? '+' : '' %><%= stats.totalChange.toFixed(1) %> <%= user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %>
+				<% } else { %>
+					<span class="text-gray-400">--</span>
+				<% } %>
+			</p>
+		</div>
+	</div>
+
+	<!-- Chart -->
+	<div class="bg-white p-6 rounded-lg shadow">
+		<h2 class="text-lg font-semibold text-slate-800 mb-4">Weight Over Time</h2>
+		<% if (entries.length > 0) { %>
+			<div class="h-64 md:h-80">
+				<canvas id="weightChart"></canvas>
+			</div>
+		<% } else { %>
+			<div class="h-64 flex items-center justify-center text-gray-500">
+				<div class="text-center">
+					<svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+					</svg>
+					<p>No weight entries yet</p>
+					<a href="/progress/log" class="text-teal-600 hover:underline mt-2 inline-block">Log your first weight</a>
+				</div>
+			</div>
+		<% } %>
+	</div>
+
+	<!-- Entries List -->
+	<div class="bg-white rounded-lg shadow">
+		<div class="p-6 border-b border-gray-200">
+			<h2 class="text-lg font-semibold text-slate-800">Weight History</h2>
+		</div>
+
+		<% if (entries.length > 0) { %>
+			<div class="divide-y divide-gray-100">
+				<% entries.forEach((entry, index) => { %>
+					<div class="p-4 hover:bg-gray-50" x-data="{ showAddPhoto: false }">
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-4">
+								<div class="text-center min-w-[60px]">
+									<p class="text-2xl font-bold text-slate-800"><%= entry.weight.toFixed(1) %></p>
+									<p class="text-xs text-gray-500"><%= user.unitSystem === 'IMPERIAL' ? 'lbs' : 'kg' %></p>
+								</div>
+								<div>
+									<div class="flex items-center gap-2">
+										<p class="text-gray-800">
+											<%= new Date(entry.recordedAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %>
+										</p>
+										<!-- Visibility badge -->
+										<% if (entry.visibility === 'PUBLIC') { %>
+											<span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded" title="Public">
+												<svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+											</span>
+										<% } else if (entry.visibility === 'TEAM') { %>
+											<span class="text-xs bg-blue-100 text-teal-700 px-1.5 py-0.5 rounded" title="Team only">
+												<svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+											</span>
+										<% } else { %>
+											<span class="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded" title="Private">
+												<svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+											</span>
+										<% } %>
+									</div>
+									<% if (entry.notes) { %>
+										<p class="text-sm text-gray-500 truncate max-w-xs"><%= entry.notes %></p>
+									<% } %>
+									<div class="flex items-center gap-2 mt-1">
+										<% if (entry.bodyFatPercentage) { %>
+											<span class="text-xs bg-gray-100 px-2 py-0.5 rounded">BF: <%= entry.bodyFatPercentage %>%</span>
+										<% } %>
+										<% if (entry.muscleMass) { %>
+											<span class="text-xs bg-gray-100 px-2 py-0.5 rounded">Muscle: <%= entry.muscleMass %></span>
+										<% } %>
+									</div>
+								</div>
+							</div>
+							<div class="flex items-center gap-1">
+								<!-- View photos button (only if photos exist) -->
+								<% if (entry.photos && entry.photos.length > 0) { %>
+									<button 
+										data-photos='<%- JSON.stringify(entry.photos.map(p => ({ id: p.id, url: p.url, visibility: p.visibility }))) %>'
+										data-entry-id="<%= entry.id %>"
+										data-date="<%= new Date(entry.recordedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>"
+										@click="$dispatch('open-gallery', { photos: JSON.parse($el.dataset.photos), entryId: $el.dataset.entryId, date: $el.dataset.date })"
+										class="p-2 text-teal-500 hover:text-teal-700 hover:bg-blue-50 rounded relative" 
+										title="View <%= entry.photos.length %> photo<%= entry.photos.length > 1 ? 's' : '' %>">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+										</svg>
+										<span class="absolute -top-1 -right-1 bg-teal-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center"><%= entry.photos.length %></span>
+									</button>
+								<% } %>
+								<!-- Add photo button -->
+								<button @click="showAddPhoto = !showAddPhoto" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded" title="Add photo">
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+									</svg>
+								</button>
+								<!-- Edit button -->
+								<a href="/progress/log?edit=<%= entry.id %>" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded" title="Edit">
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+									</svg>
+								</a>
+								<!-- Delete button -->
+								<form action="/progress/delete/<%= entry.id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this entry?');">
+									<button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+									</button>
+								</form>
+							</div>
+						</div>
+
+						<!-- Add photo form (expandable) -->
+						<div x-show="showAddPhoto" x-transition x-cloak class="mt-4 p-4 bg-gray-50 rounded-lg">
+							<form action="/progress/photo/<%= entry.id %>" method="POST" enctype="multipart/form-data">
+								<div class="flex flex-col gap-4">
+									<div class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+										<div class="flex-1 w-full">
+											<label class="block text-sm font-medium text-gray-700 mb-1">Add progress photos</label>
+											<input type="file" name="photos" accept="image/*" multiple
+												class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-teal-700 hover:file:bg-blue-100:bg-blue-900/50">
+										</div>
+										<div class="w-full sm:w-auto">
+											<label class="block text-sm font-medium text-gray-700 mb-1">Photo visibility</label>
+											<select name="photoVisibility" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+												<option value="PRIVATE">Private (Only me)</option>
+												<option value="TEAM">Team members</option>
+												<option value="PUBLIC">Public</option>
+											</select>
+										</div>
+									</div>
+									<div class="flex justify-end gap-2">
+										<button type="button" @click="showAddPhoto = false" class="px-4 py-2 text-gray-600 bg-gray-200 text-sm rounded-lg hover:bg-gray-300">
+											Cancel
+										</button>
+										<button type="submit" class="px-4 py-2 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700">
+											Upload
+										</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				<% }); %>
+			</div>
+		<% } else { %>
+			<div class="p-8 text-center text-gray-500">
+				<p>No weight entries yet. Start tracking your progress!</p>
+			</div>
+		<% } %>
+	</div>
+</div>
+
+<!-- Photo Gallery Modal -->
+<div x-data="{ 
+	open: false, 
+	photos: [],
+	entryId: '',
+	currentIndex: 0,
+	date: '',
+	updating: false,
+	deleting: false,
+	next() {
+		this.currentIndex = (this.currentIndex + 1) % this.photos.length;
+	},
+	prev() {
+		this.currentIndex = (this.currentIndex - 1 + this.photos.length) % this.photos.length;
+	},
+	currentPhoto() {
+		return this.photos[this.currentIndex] || null;
+	},
+	async updateVisibility(visibility) {
+		const photo = this.currentPhoto();
+		if (!photo || this.updating) return;
+		this.updating = true;
+		try {
+			const res = await fetch(`/progress/photo/${photo.id}/visibility`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ visibility })
+			});
+			if (res.ok) {
+				this.photos[this.currentIndex].visibility = visibility;
+			}
+		} finally {
+			this.updating = false;
+		}
+	},
+	async deletePhoto() {
+		const photo = this.currentPhoto();
+		if (!photo || this.deleting) return;
+		if (!confirm('Delete this photo?')) return;
+		this.deleting = true;
+		try {
+			const res = await fetch(`/progress/photo/${photo.id}`, { method: 'DELETE' });
+			if (res.ok) {
+				this.photos.splice(this.currentIndex, 1);
+				if (this.photos.length === 0) {
+					this.open = false;
+					window.location.reload();
+				} else if (this.currentIndex >= this.photos.length) {
+					this.currentIndex = this.photos.length - 1;
+				}
+			}
+		} finally {
+			this.deleting = false;
+		}
+	}
+}" 
+	@open-gallery.window="photos = $event.detail.photos; entryId = $event.detail.entryId; date = $event.detail.date; currentIndex = 0; open = true"
+	x-show="open" 
+	x-cloak
+	@keydown.escape.window="open = false"
+	@keydown.arrow-right.window="if(open) next()"
+	@keydown.arrow-left.window="if(open) prev()"
+	class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+	x-transition:enter="transition ease-out duration-200"
+	x-transition:enter-start="opacity-0"
+	x-transition:enter-end="opacity-100"
+	x-transition:leave="transition ease-in duration-150"
+	x-transition:leave-start="opacity-100"
+	x-transition:leave-end="opacity-0">
+	
+	<!-- Close button -->
+	<button @click="open = false" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+		<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+		</svg>
+	</button>
+
+	<!-- Date label -->
+	<div class="absolute top-4 left-4 text-white text-lg font-medium" x-text="date"></div>
+
+	<!-- Photo controls (visibility + delete) -->
+	<div class="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 rounded-lg px-3 py-2">
+		<span class="text-white text-sm mr-2">Visibility:</span>
+		<button 
+			@click="updateVisibility('PRIVATE')" 
+			:disabled="updating"
+			:class="currentPhoto()?.visibility === 'PRIVATE' ? 'bg-gray-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'"
+			class="px-2 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50" 
+			title="Private">
+			<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+		</button>
+		<button 
+			@click="updateVisibility('TEAM')" 
+			:disabled="updating"
+			:class="currentPhoto()?.visibility === 'TEAM' ? 'bg-teal-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'"
+			class="px-2 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50" 
+			title="Team only">
+			<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+		</button>
+		<button 
+			@click="updateVisibility('PUBLIC')" 
+			:disabled="updating"
+			:class="currentPhoto()?.visibility === 'PUBLIC' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'"
+			class="px-2 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50" 
+			title="Public">
+			<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+		</button>
+		<div class="w-px h-5 bg-gray-600 mx-1"></div>
+		<button 
+			@click="deletePhoto()" 
+			:disabled="deleting"
+			class="px-2 py-1 rounded text-xs font-medium bg-gray-800 text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-colors disabled:opacity-50" 
+			title="Delete photo">
+			<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+		</button>
+	</div>
+
+	<!-- Photo counter -->
+	<div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">
+		<span x-text="currentIndex + 1"></span> / <span x-text="photos.length"></span>
+	</div>
+
+	<!-- Previous button -->
+	<button 
+		x-show="photos.length > 1"
+		@click="prev()" 
+		class="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white hover:text-gray-300 bg-black/30 rounded-full">
+		<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+		</svg>
+	</button>
+
+	<!-- Image -->
+	<div class="max-w-4xl max-h-[80vh] flex items-center justify-center">
+		<template x-for="(photo, index) in photos" :key="photo.id">
+			<img 
+				x-show="currentIndex === index"
+				:src="photo.url" 
+				alt="Progress photo"
+				class="max-w-full max-h-[80vh] object-contain rounded-lg"
+				x-transition:enter="transition ease-out duration-200"
+				x-transition:enter-start="opacity-0 scale-95"
+				x-transition:enter-end="opacity-100 scale-100">
+		</template>
+	</div>
+
+	<!-- Next button -->
+	<button 
+		x-show="photos.length > 1"
+		@click="next()" 
+		class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white hover:text-gray-300 bg-black/30 rounded-full">
+		<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+		</svg>
+	</button>
+
+	<!-- Thumbnail strip -->
+	<div x-show="photos.length > 1" class="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-2">
+		<template x-for="(photo, index) in photos" :key="'thumb-' + photo.id">
+			<button @click="currentIndex = index" class="w-12 h-12 rounded overflow-hidden border-2 transition-all relative"
+				:class="currentIndex === index ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'">
+				<img :src="photo.url" alt="" class="w-full h-full object-cover">
+				<!-- Visibility indicator on thumbnail -->
+				<span class="absolute bottom-0 right-0 w-3 h-3 rounded-tl"
+					:class="{ 'bg-gray-600': photo.visibility === 'PRIVATE', 'bg-teal-500': photo.visibility === 'TEAM', 'bg-green-500': photo.visibility === 'PUBLIC' }"></span>
+			</button>
+		</template>
+	</div>
+</div>
+
+<style>
+	[x-cloak] { display: none !important; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+	const chartData = <%- chartData %>;
+
+	if (chartData.length > 0) {
+		const ctx = document.getElementById('weightChart').getContext('2d');
+
+		// Detect dark mode
+		const isDark = document.documentElement.classList.contains('dark');
+		const textColor = isDark ? 'rgb(229, 231, 235)' : 'rgb(75, 85, 99)';
+		const gridColor = isDark ? 'rgba(75, 85, 99, 0.2)' : 'rgba(0, 0, 0, 0.1)';
+
+		new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: chartData.map(d => {
+					const date = new Date(d.date);
+					return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+				}),
+				datasets: [{
+					label: 'Weight',
+					data: chartData.map(d => d.weight),
+					borderColor: 'rgb(59, 130, 246)',
+					backgroundColor: 'rgba(59, 130, 246, 0.1)',
+					fill: true,
+					tension: 0.3,
+					pointRadius: 4,
+					pointHoverRadius: 6,
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						display: false
+					},
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								return context.parsed.y.toFixed(1) + ' <%= user.unitSystem === "IMPERIAL" ? "lbs" : "kg" %>';
+							}
+						}
+					}
+				},
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							color: textColor
+						}
+					},
+					y: {
+						beginAtZero: false,
+						grid: {
+							color: gridColor
+						},
+						ticks: {
+							color: textColor,
+							callback: function(value) {
+								return value + ' <%= user.unitSystem === "IMPERIAL" ? "lbs" : "kg" %>';
+							}
+						}
+					}
+				},
+				interaction: {
+					intersect: false,
+					mode: 'index'
+				}
+			}
+		});
+	}
+</script>

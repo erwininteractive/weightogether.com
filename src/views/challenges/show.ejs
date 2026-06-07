@@ -1,0 +1,330 @@
+<div class="min-h-screen bg-slate-50">
+	<!-- Header -->
+	<header class="bg-white border-b border-slate-200">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+			<a href="/teams/<%= challenge.team.id %>/challenges" class="text-teal-600 hover:underline text-sm mb-2 inline-block">
+				← Back to Challenges
+			</a>
+			<div class="flex items-start justify-between">
+				<div class="flex-1">
+					<div class="flex items-center gap-3 mb-2">
+						<h1 class="text-3xl font-bold text-slate-900"><%= challenge.name %></h1>
+						<span class="px-3 py-1 text-xs font-semibold rounded-full <% if (challenge.status === 'ACTIVE') { %> bg-green-100 text-green-800 <% } else if (challenge.status === 'UPCOMING') { %> bg-blue-100 text-blue-800 <% } else if (challenge.status === 'COMPLETED') { %> bg-slate-100 text-slate-800 <% } else { %> bg-red-100 text-red-800 <% } %>">
+							<%= challenge.status %>
+						</span>
+					</div>
+					<p class="text-slate-600"><%= challenge.description %></p>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- Main Content -->
+	<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+		<!-- Flash Messages -->
+		<% if (success) { %>
+			<div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+				<p class="text-green-800"><%= success %></p>
+			</div>
+		<% } %>
+		<% if (error) { %>
+			<div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+				<p class="text-red-800"><%= error %></p>
+			</div>
+		<% } %>
+
+		<div class="grid lg:grid-cols-3 gap-6">
+			<!-- Challenge Details -->
+			<div class="lg:col-span-1 space-y-6">
+				<!-- Info Card -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<h2 class="text-lg font-semibold text-slate-900 mb-4">Challenge Details</h2>
+
+					<!-- Type -->
+					<div class="mb-4">
+						<dt class="text-sm font-medium text-slate-600 mb-1">Type</dt>
+						<dd class="text-slate-900">
+							<% if (challenge.type === 'WEIGHT_LOSS_PERCENTAGE') { %>
+								Weight Loss Percentage
+							<% } else if (challenge.type === 'TOTAL_WEIGHT_LOSS') { %>
+								Total Weight Loss
+							<% } else if (challenge.type === 'CONSISTENCY') { %>
+								Consistency
+							<% } else { %>
+								Activity Based
+							<% } %>
+						</dd>
+					</div>
+
+					<!-- Dates -->
+					<div class="mb-4">
+						<dt class="text-sm font-medium text-slate-600 mb-1">Duration</dt>
+						<dd class="text-slate-900">
+							<div class="text-sm">
+								<div><%= new Date(challenge.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+								<div class="text-slate-600">to</div>
+								<div><%= new Date(challenge.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+							</div>
+						</dd>
+					</div>
+
+					<!-- Target Value -->
+					<% if (challenge.targetValue) { %>
+						<div class="mb-4">
+							<dt class="text-sm font-medium text-slate-600 mb-1">Target Goal</dt>
+							<dd class="text-slate-900 font-semibold">
+								<%= challenge.targetValue %>
+								<% if (challenge.type === 'WEIGHT_LOSS_PERCENTAGE') { %>
+									%
+								<% } else if (challenge.type === 'TOTAL_WEIGHT_LOSS') { %>
+									lbs
+								<% } else if (challenge.type === 'CONSISTENCY') { %>
+									days
+								<% } %>
+							</dd>
+						</div>
+					<% } %>
+
+					<!-- Reward Points -->
+					<% if (challenge.rewardPoints > 0) { %>
+						<div class="mb-4">
+							<dt class="text-sm font-medium text-slate-600 mb-1">Reward</dt>
+							<dd class="text-slate-900 font-semibold">
+								<%= challenge.rewardPoints %> points
+							</dd>
+						</div>
+					<% } %>
+
+					<!-- Participants Count -->
+					<div>
+						<dt class="text-sm font-medium text-slate-600 mb-1">Participants</dt>
+						<dd class="text-slate-900 font-semibold">
+							<%= challenge._count.participants %>
+						</dd>
+					</div>
+				</div>
+
+				<!-- Participation Card -->
+				<div class="bg-white rounded-lg border border-slate-200 p-6">
+					<% if (isParticipating && userParticipation) { %>
+						<h3 class="text-lg font-semibold text-slate-900 mb-4">Your Progress</h3>
+
+						<div class="mb-4">
+							<div class="flex items-baseline justify-between mb-2">
+								<span class="text-2xl font-bold text-teal-600">
+									<%= userParticipation.progress.toFixed(1) %>
+									<% if (challenge.type === 'WEIGHT_LOSS_PERCENTAGE') { %>
+										%
+									<% } else if (challenge.type === 'TOTAL_WEIGHT_LOSS') { %>
+										lbs
+									<% } else if (challenge.type === 'CONSISTENCY') { %>
+										days
+									<% } %>
+								</span>
+								<% if (challenge.targetValue) { %>
+									<span class="text-sm text-slate-600">
+										of <%= challenge.targetValue %>
+										<% if (challenge.type === 'WEIGHT_LOSS_PERCENTAGE') { %>%<% } else if (challenge.type === 'TOTAL_WEIGHT_LOSS') { %>lbs<% } else if (challenge.type === 'CONSISTENCY') { %>days<% } %>
+									</span>
+								<% } %>
+							</div>
+							<% if (challenge.targetValue) { %>
+								<div class="w-full bg-slate-200 rounded-full h-2">
+									<div class="bg-teal-600 h-2 rounded-full transition-all" style="width: <%= Math.min((userParticipation.progress / challenge.targetValue) * 100, 100) %>%"></div>
+								</div>
+							<% } %>
+						</div>
+
+						<% if (userParticipation.completed) { %>
+							<div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+								<div class="flex items-center text-green-800">
+									<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+									<span class="text-sm font-medium">Completed!</span>
+								</div>
+								<% if (userParticipation.completedAt) { %>
+									<p class="text-xs text-green-700 mt-1 ml-7">
+										<%= new Date(userParticipation.completedAt).toLocaleDateString() %>
+									</p>
+								<% } %>
+							</div>
+						<% } %>
+
+						<% if (['UPCOMING', 'ACTIVE'].includes(challenge.status)) { %>
+							<button
+								onclick="leaveChallenge()"
+								class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+							>
+								Leave Challenge
+							</button>
+						<% } %>
+					<% } else { %>
+						<h3 class="text-lg font-semibold text-slate-900 mb-4">Join Challenge</h3>
+						<p class="text-slate-600 text-sm mb-4">
+							Start tracking your progress and compete with your teammates!
+						</p>
+						<% if (['UPCOMING', 'ACTIVE'].includes(challenge.status)) { %>
+							<button
+								onclick="joinChallenge()"
+								class="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors"
+							>
+								Join Challenge
+							</button>
+						<% } else { %>
+							<p class="text-slate-500 text-sm">
+								This challenge is no longer accepting participants.
+							</p>
+						<% } %>
+					<% } %>
+				</div>
+			</div>
+
+			<!-- Leaderboard -->
+			<div class="lg:col-span-2">
+				<div class="bg-white rounded-lg border border-slate-200">
+					<div class="p-6 border-b border-slate-200">
+						<h2 class="text-xl font-semibold text-slate-900">Leaderboard</h2>
+					</div>
+
+					<% if (challenge.participants.length === 0) { %>
+						<div class="p-12 text-center">
+							<svg class="w-16 h-16 mx-auto text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+							</svg>
+							<p class="text-slate-600">No participants yet. Be the first to join!</p>
+						</div>
+					<% } else { %>
+						<div class="divide-y divide-slate-200">
+							<% challenge.participants.forEach((participant, index) => { %>
+								<div class="p-4 hover:bg-slate-50 transition-colors <% if (participant.userId === user.sub) { %>bg-blue-50<% } %>">
+									<div class="flex items-center gap-4">
+										<!-- Rank -->
+										<div class="flex-shrink-0 w-8 text-center">
+											<% if (index === 0 && participant.completed) { %>
+												<svg class="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+													<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+												</svg>
+											<% } else if (index === 1 && participant.completed) { %>
+												<svg class="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+													<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+												</svg>
+											<% } else if (index === 2 && participant.completed) { %>
+												<svg class="w-8 h-8 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+													<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+												</svg>
+											<% } else { %>
+												<span class="text-lg font-semibold text-slate-600">#<%= index + 1 %></span>
+											<% } %>
+										</div>
+
+										<!-- Avatar -->
+										<div class="flex-shrink-0">
+											<% if (participant.user.avatarUrl) { %>
+												<img src="<%= participant.user.avatarUrl %>" alt="<%= participant.user.displayName || participant.user.username %>"
+													 class="w-12 h-12 rounded-full">
+											<% } else { %>
+												<div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center">
+													<span class="text-white font-semibold text-lg">
+														<%= (participant.user.displayName || participant.user.username).charAt(0).toUpperCase() %>
+													</span>
+												</div>
+											<% } %>
+										</div>
+
+										<!-- User Info -->
+										<div class="flex-1 min-w-0">
+											<div class="flex items-center gap-2">
+												<p class="font-semibold text-slate-900 truncate">
+													<%= participant.user.displayName || participant.user.username %>
+												</p>
+												<% if (participant.userId === user.sub) { %>
+													<span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">You</span>
+												<% } %>
+												<% if (participant.completed) { %>
+													<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+													</svg>
+												<% } %>
+											</div>
+											<p class="text-sm text-slate-600">
+												Joined <%= new Date(participant.joinedAt).toLocaleDateString() %>
+											</p>
+										</div>
+
+										<!-- Progress -->
+										<div class="text-right">
+											<p class="text-2xl font-bold text-slate-900">
+												<%= participant.progress.toFixed(1) %>
+												<% if (challenge.type === 'WEIGHT_LOSS_PERCENTAGE') { %>
+													<span class="text-base text-slate-600">%</span>
+												<% } else if (challenge.type === 'TOTAL_WEIGHT_LOSS') { %>
+													<span class="text-base text-slate-600">lbs</span>
+												<% } else if (challenge.type === 'CONSISTENCY') { %>
+													<span class="text-base text-slate-600">days</span>
+												<% } %>
+											</p>
+											<% if (challenge.targetValue) { %>
+												<p class="text-xs text-slate-600">
+													<%= ((participant.progress / challenge.targetValue) * 100).toFixed(0) %>% of goal
+												</p>
+											<% } %>
+										</div>
+									</div>
+								</div>
+							<% }) %>
+						</div>
+					<% } %>
+				</div>
+			</div>
+		</div>
+	</main>
+</div>
+
+<script>
+async function joinChallenge() {
+	try {
+		const response = await fetch('/challenges/<%= challenge.id %>/join', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		const result = await response.json();
+
+		if (result.success) {
+			window.location.reload();
+		} else {
+			alert(result.message || 'Failed to join challenge');
+		}
+	} catch (error) {
+		alert('An error occurred. Please try again.');
+	}
+}
+
+async function leaveChallenge() {
+	if (!confirm('Are you sure you want to leave this challenge?')) {
+		return;
+	}
+
+	try {
+		const response = await fetch('/challenges/<%= challenge.id %>/leave', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		const result = await response.json();
+
+		if (result.success) {
+			window.location.reload();
+		} else {
+			alert(result.message || 'Failed to leave challenge');
+		}
+	} catch (error) {
+		alert('An error occurred. Please try again.');
+	}
+}
+</script>

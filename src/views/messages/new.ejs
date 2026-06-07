@@ -1,0 +1,95 @@
+<div class="max-w-2xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center gap-4">
+        <a href="/messages" class="text-gray-600 hover:text-gray-900">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </a>
+        <h1 class="text-2xl font-bold text-slate-800">New Conversation</h1>
+    </div>
+
+    <!-- Error Messages -->
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <% errors.forEach(function(error) { %>
+                <p><%= error.msg %></p>
+            <% }); %>
+        </div>
+    <% } %>
+
+    <!-- Search Form -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <form action="/messages/new" method="GET" class="mb-6">
+            <label class="block text-sm font-medium text-slate-700 mb-2">Find a user to message</label>
+            <div class="flex gap-2">
+                <input
+                    type="text"
+                    name="q"
+                    value="<%= searchQuery %>"
+                    placeholder="Search by username or email..."
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    autocomplete="off"
+                >
+                <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium">
+                    Search
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Enter at least 2 characters to search</p>
+        </form>
+
+        <!-- Search Results -->
+        <% if (searchQuery && searchQuery.length >= 2) { %>
+            <div class="border-t border-gray-200 pt-4">
+                <h3 class="text-sm font-medium text-slate-700 mb-3">Search Results</h3>
+                <% if (users && users.length > 0) { %>
+                    <div class="space-y-2">
+                        <% users.forEach(function(searchUser) { %>
+                            <form action="/messages/new" method="POST" class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                <input type="hidden" name="participantId" value="<%= searchUser.id %>">
+
+                                <% if (searchUser.avatarUrl) { %>
+                                    <img src="<%= searchUser.avatarUrl %>" alt="<%= searchUser.username %>" class="w-10 h-10 rounded-full object-cover">
+                                <% } else { %>
+                                    <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold">
+                                        <%= searchUser.username.charAt(0).toUpperCase() %>
+                                    </div>
+                                <% } %>
+
+                                <div class="flex-1">
+                                    <span class="font-medium text-gray-900"><%= searchUser.username %></span>
+                                </div>
+
+                                <button type="submit" class="px-4 py-1.5 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700 transition-colors font-medium">
+                                    Message
+                                </button>
+                            </form>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <p class="text-gray-500">No users found matching "<%= searchQuery %>"</p>
+                    </div>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Info Card -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex gap-3">
+            <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <h4 class="font-medium text-blue-800">Direct Messages</h4>
+                <p class="text-sm text-blue-700 mt-1">
+                    Search for any user to start a private conversation. Your messages are only visible to you and the recipient.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

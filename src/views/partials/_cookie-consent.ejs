@@ -1,0 +1,84 @@
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="fixed bottom-0 left-0 right-0 z-50 hidden">
+    <div class="bg-slate-800 border-t border-slate-700 shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex-1 text-center sm:text-left">
+                    <p class="text-slate-200 text-sm">
+                        We use cookies to keep you logged in and improve your experience. By continuing to use this site, you consent to our use of cookies.
+                        <a href="/privacy" class="text-teal-400 hover:text-teal-300 underline ml-1">Learn more</a>
+                    </p>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <button
+                        onclick="acceptCookies()"
+                        class="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        Accept
+                    </button>
+                    <button
+                        onclick="declineCookies()"
+                        class="px-5 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors">
+                        Decline
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const CONSENT_KEY = 'cookie_consent';
+    const banner = document.getElementById('cookie-consent');
+    
+    // Check if user has already made a choice
+    const consent = localStorage.getItem(CONSENT_KEY);
+    
+    if (!consent) {
+        // Show banner after a short delay for better UX
+        setTimeout(() => {
+            banner.classList.remove('hidden');
+            banner.classList.add('animate-slide-up');
+        }, 1000);
+    }
+    
+    // Make functions globally available
+    window.acceptCookies = function() {
+        localStorage.setItem(CONSENT_KEY, 'accepted');
+        hideBanner();
+    };
+    
+    window.declineCookies = function() {
+        localStorage.setItem(CONSENT_KEY, 'declined');
+        hideBanner();
+        // Note: Essential cookies (auth) are still used as they're necessary for the site to function
+        // If user declines, we just don't set any additional tracking cookies (which we don't have anyway)
+    };
+    
+    function hideBanner() {
+        banner.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+        banner.style.transform = 'translateY(100%)';
+        banner.style.opacity = '0';
+        setTimeout(() => {
+            banner.classList.add('hidden');
+        }, 300);
+    }
+})();
+</script>
+
+<style>
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+}
+</style>

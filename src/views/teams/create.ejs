@@ -1,0 +1,132 @@
+<div class="max-w-2xl mx-auto space-y-6">
+    <!-- Header -->
+    <div>
+        <a href="/teams" class="inline-flex items-center gap-1 text-gray-600 hover:text-gray-900 mb-4">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Teams
+        </a>
+        <h1 class="text-2xl font-bold text-slate-800">Create a Team</h1>
+        <p class="text-gray-600 mt-1">Bring people together to support each other's fitness goals</p>
+    </div>
+
+    <!-- Validation Errors -->
+    <% if (errors && errors.length > 0) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <ul class="list-disc list-inside space-y-1">
+                <% errors.forEach(function(error) { %>
+                    <li><%= error.msg %></li>
+                <% }); %>
+            </ul>
+        </div>
+    <% } %>
+
+    <!-- Create Form -->
+    <form action="/teams/create" method="POST" class="bg-white rounded-lg shadow p-6 space-y-6">
+        <!-- Team Name -->
+        <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                Team Name <span class="text-red-500">*</span>
+            </label>
+            <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                value="<%= formData.name || '' %>"
+                required
+                minlength="3"
+                maxlength="50"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-500"
+                placeholder="e.g., Morning Warriors"
+            >
+            <p class="text-sm text-gray-500 mt-1">3-50 characters. Letters, numbers, spaces, hyphens, and underscores only.</p>
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+            </label>
+            <textarea 
+                id="description" 
+                name="description" 
+                rows="3"
+                maxlength="500"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-500"
+                placeholder="What's your team about?"
+            ><%= formData.description || '' %></textarea>
+            <p class="text-sm text-gray-500 mt-1">Optional. Max 500 characters.</p>
+        </div>
+
+        <!-- Visibility -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Visibility</label>
+            <div class="space-y-3">
+                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input 
+                        type="radio" 
+                        name="isPublic" 
+                        value="true"
+                        <%= formData.isPublic !== 'false' ? 'checked' : '' %>
+                        class="mt-1"
+                    >
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium text-gray-900">Public</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Anyone can find and join this team</p>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input 
+                        type="radio" 
+                        name="isPublic" 
+                        value="false"
+                        <%= formData.isPublic === 'false' ? 'checked' : '' %>
+                        class="mt-1"
+                    >
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            <span class="font-medium text-gray-900">Private</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Only people with the invite link can join</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Max Members -->
+        <div>
+            <label for="maxMembers" class="block text-sm font-medium text-gray-700 mb-1">
+                Maximum Members
+            </label>
+            <select 
+                id="maxMembers" 
+                name="maxMembers"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900"
+            >
+                <option value="10" <%= formData.maxMembers == 10 ? 'selected' : '' %>>10 members</option>
+                <option value="25" <%= formData.maxMembers == 25 ? 'selected' : '' %>>25 members</option>
+                <option value="50" <%= !formData.maxMembers || formData.maxMembers == 50 ? 'selected' : '' %>>50 members</option>
+                <option value="100" <%= formData.maxMembers == 100 ? 'selected' : '' %>>100 members</option>
+            </select>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex gap-3 pt-4">
+            <button type="submit" class="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium">
+                Create Team
+            </button>
+            <a href="/teams" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>

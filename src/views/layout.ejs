@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<%- include('partials/_head') %>
+</head>
+<body class="min-h-screen bg-gray-100 text-gray-800 transition-colors duration-200">
+	<%- include('partials/_nav') %>
+	<div class="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+		<%- body %>
+	</div>
+
+	<%- include('partials/_achievement-modal') %>
+	<%- include('partials/_toast') %>
+	<%- include('partials/_cookie-consent') %>
+	<%- include('partials/_scripts') %>
+</body>
+</html>

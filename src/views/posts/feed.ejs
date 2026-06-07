@@ -1,0 +1,204 @@
+<div class="max-w-4xl mx-auto" x-data="{ showNewPostModal: false, newPost: { type: 'GENERAL', content: '', title: '' } }">
+	<!-- Team Header -->
+	<div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-slate-200">
+		<div class="flex items-start gap-4">
+			<% if (team.avatarUrl) { %>
+				<img src="<%= team.avatarUrl %>" alt="<%= team.name %>" class="w-16 h-16 rounded-lg object-cover">
+			<% } else { %>
+				<div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+					<span class="text-2xl font-bold text-teal-600">
+						<%= team.name.charAt(0).toUpperCase() %>
+					</span>
+				</div>
+			<% } %>
+			<div class="flex-1">
+				<div class="flex items-start justify-between">
+					<div>
+						<h1 class="text-2xl font-bold text-slate-900"><%= team.name %> Feed</h1>
+						<% if (team.description) { %>
+							<p class="text-slate-600 mt-1"><%= team.description %></p>
+						<% } %>
+					</div>
+					<a href="/teams/<%= team.id %>" class="text-sm text-teal-600 hover:text-teal-700">
+						Back to Team
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- New Post Button -->
+	<div class="mb-6">
+		<button
+			@click="showNewPostModal = true"
+			class="w-full bg-white rounded-xl shadow-sm p-4 border border-slate-200 hover:border-teal-500 transition-colors text-left group">
+			<div class="flex items-center gap-3">
+				<% if (typeof user !== 'undefined' && user) { %>
+					<% if (user.avatarUrl) { %>
+						<img src="<%= user.avatarUrl %>" alt="<%= user.displayName || user.username %>" class="w-10 h-10 rounded-full">
+					<% } else { %>
+						<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+							<span class="text-sm font-bold text-teal-600">
+								<%= (user.displayName || user.username).charAt(0).toUpperCase() %>
+							</span>
+						</div>
+					<% } %>
+				<% } %>
+				<span class="text-slate-500 group-hover:text-slate-700">
+					Share something with your team...
+				</span>
+			</div>
+		</button>
+	</div>
+
+	<!-- Posts Feed -->
+	<div class="space-y-4">
+		<% if (posts && posts.length > 0) { %>
+			<% posts.forEach(function(post) { %>
+				<%- include('_post-card', { post: post }) %>
+			<% }); %>
+		<% } else { %>
+			<!-- Empty State -->
+			<div class="bg-white rounded-xl shadow-sm p-12 text-center border border-slate-200">
+				<svg class="w-16 h-16 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+				</svg>
+				<h3 class="text-lg font-semibold text-slate-900 mb-2">
+					No posts yet
+				</h3>
+				<p class="text-slate-600 mb-6">
+					Be the first to share something with your team!
+				</p>
+				<button
+					@click="showNewPostModal = true"
+					class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+					</svg>
+					Create First Post
+				</button>
+			</div>
+		<% } %>
+	</div>
+
+	<!-- New Post Modal -->
+	<div x-show="showNewPostModal"
+		x-cloak
+		@click.away="showNewPostModal = false"
+		class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+		<div @click.stop class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+			<div class="p-6 border-b border-slate-200">
+				<div class="flex items-center justify-between">
+					<h2 class="text-xl font-bold text-slate-900">Create Post</h2>
+					<button @click="showNewPostModal = false" class="text-slate-400 hover:text-slate-600">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<form id="newPostForm" class="p-6 space-y-4">
+				<!-- Post Type -->
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						Post Type
+					</label>
+					<select x-model="newPost.type" class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900">
+						<option value="GENERAL">General Update</option>
+						<option value="MILESTONE">Milestone</option>
+						<option value="TIP">Tip/Advice</option>
+						<option value="QUESTION">Question</option>
+						<option value="RECIPE">Recipe</option>
+						<option value="WORKOUT">Workout</option>
+					</select>
+				</div>
+
+				<!-- Title (Optional) -->
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						Title <span class="text-slate-500">(optional)</span>
+					</label>
+					<input
+						type="text"
+						x-model="newPost.title"
+						maxlength="200"
+						placeholder="Give your post a title..."
+						class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900">
+				</div>
+
+				<!-- Content -->
+				<div>
+					<label class="block text-sm font-medium text-slate-700 mb-2">
+						Content <span class="text-red-500">*</span>
+					</label>
+					<textarea
+						x-model="newPost.content"
+						rows="6"
+						maxlength="5000"
+						required
+						placeholder="Share your thoughts..."
+						class="w-full px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 resize-none"></textarea>
+					<p class="text-xs text-slate-500 mt-1">
+						<span x-text="newPost.content.length"></span>/5000 characters
+					</p>
+				</div>
+
+				<!-- Actions -->
+				<div class="flex gap-3 pt-4">
+					<button
+						type="button"
+						@click="showNewPostModal = false"
+						class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors">
+						Cancel
+					</button>
+					<button
+						type="submit"
+						class="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors">
+						Post
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+document.getElementById('newPostForm').addEventListener('submit', async function(e) {
+	e.preventDefault();
+
+	const form = e.target;
+	const submitButton = form.querySelector('button[type="submit"]');
+	submitButton.disabled = true;
+	submitButton.textContent = 'Posting...';
+
+	try {
+		const response = await fetch('/teams/<%= team.id %>/posts', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				type: Alpine.store || document.querySelector('[x-data]').__x.$data.newPost.type,
+				title: document.querySelector('[x-model="newPost.title"]').value || null,
+				content: document.querySelector('[x-model="newPost.content"]').value,
+			}),
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			window.location.reload();
+		} else {
+			alert(data.message || 'Failed to create post');
+			submitButton.disabled = false;
+			submitButton.textContent = 'Post';
+		}
+	} catch (error) {
+		console.error('Error creating post:', error);
+		alert('An error occurred while creating the post');
+		submitButton.disabled = false;
+		submitButton.textContent = 'Post';
+	}
+});
+</script>

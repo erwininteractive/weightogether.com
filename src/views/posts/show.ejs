@@ -1,0 +1,452 @@
+<div class="max-w-4xl mx-auto">
+	<!-- Back Link -->
+	<div class="mb-6">
+		<a href="/teams/<%= post.team.id %>/feed" class="inline-flex items-center text-teal-600 hover:text-teal-700">
+			<svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+			</svg>
+			Back to <%= post.team.name %> Feed
+		</a>
+	</div>
+
+	<!-- Post -->
+	<div class="bg-white rounded-xl shadow-sm p-8 border border-slate-200 mb-6">
+		<!-- Post Header -->
+		<div class="flex items-start gap-4 mb-6">
+			<!-- Author Avatar -->
+			<% if (post.author.avatarUrl) { %>
+				<img src="<%= post.author.avatarUrl %>" alt="<%= post.author.displayName || post.author.username %>" class="w-16 h-16 rounded-full">
+			<% } else { %>
+				<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+					<span class="text-2xl font-bold text-teal-600">
+						<%= (post.author.displayName || post.author.username).charAt(0).toUpperCase() %>
+					</span>
+				</div>
+			<% } %>
+
+			<!-- Author Info -->
+			<div class="flex-1">
+				<div class="flex items-start justify-between">
+					<div>
+						<p class="text-lg font-semibold text-slate-900">
+							<%= post.author.displayName || post.author.username %>
+						</p>
+						<div class="flex items-center gap-2 text-sm text-slate-500">
+							<span><%= new Date(post.createdAt).toLocaleString() %></span>
+							<% if (post.updatedAt && post.updatedAt > post.createdAt) { %>
+								<span>•</span>
+								<span class="italic">Edited</span>
+							<% } %>
+						</div>
+					</div>
+
+					<!-- Actions -->
+					<% if (typeof user !== 'undefined' && user && user.id === post.authorId) { %>
+						<div class="relative" x-data="{ open: false }">
+							<button @click="open = !open" @click.away="open = false" class="text-slate-400 hover:text-slate-600 p-1">
+								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+									<path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+								</svg>
+							</button>
+							<div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10 border border-slate-200">
+								<button onclick="deletePost('<%= post.id %>')" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100">
+									Delete Post
+								</button>
+							</div>
+						</div>
+					<% } %>
+				</div>
+			</div>
+		</div>
+
+		<!-- Post Type Badge -->
+		<% if (post.type !== 'GENERAL') { %>
+			<div class="mb-4">
+				<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 capitalize">
+					<%= post.type.toLowerCase().replace('_', ' ') %>
+				</span>
+			</div>
+		<% } %>
+
+		<!-- Post Title -->
+		<% if (post.title) { %>
+			<h1 class="text-3xl font-bold text-slate-900 mb-4">
+				<%= post.title %>
+			</h1>
+		<% } %>
+
+		<!-- Post Content -->
+		<div class="prose max-w-none text-slate-700 mb-6">
+			<%= post.content %>
+		</div>
+
+		<!-- Tags -->
+		<% if (post.tags && post.tags.length > 0) { %>
+			<div class="flex flex-wrap gap-2 mb-6">
+				<% post.tags.forEach(function(tag) { %>
+					<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+						#<%= tag %>
+					</span>
+				<% }); %>
+			</div>
+		<% } %>
+
+		<!-- Post Stats & Actions -->
+		<div class="flex items-center gap-6 pt-6 border-t border-slate-200">
+			<!-- Like Button -->
+			<button
+				onclick="toggleLike('<%= post.id %>', this)"
+				data-liked="<%= post.isLiked %>"
+				class="flex items-center gap-2 text-sm text-slate-600 hover:text-teal-600 transition-colors group">
+				<svg class="w-6 h-6 <%= post.isLiked ? 'fill-current text-teal-600' : '' %> group-hover:scale-110 transition-transform" fill="<%= post.isLiked ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+				</svg>
+				<span class="font-medium like-count"><%= post._count.likes %></span>
+				<span><%= post._count.likes === 1 ? 'Like' : 'Likes' %></span>
+			</button>
+
+			<!-- Comment Count -->
+			<div class="flex items-center gap-2 text-sm text-slate-600">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+				</svg>
+				<span class="font-medium"><%= post._count.comments %></span>
+				<span><%= post._count.comments === 1 ? 'Comment' : 'Comments' %></span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Comments Section -->
+	<div id="comments" class="bg-white rounded-xl shadow-sm p-8 border border-slate-200">
+		<h2 class="text-2xl font-bold text-slate-900 mb-6">
+			Comments (<%= post.comments.length %>)
+		</h2>
+
+		<!-- New Comment Form -->
+		<div class="mb-8">
+			<form id="newCommentForm" class="space-y-4">
+				<textarea
+					id="commentContent"
+					name="content"
+					rows="3"
+					required
+					maxlength="2000"
+					placeholder="Write a comment..."
+					class="w-full px-4 py-3 border border-slate-300 rounded-lg bg-white text-slate-900 resize-none focus:ring-2 focus:ring-teal-500"></textarea>
+				<div class="flex justify-between items-center">
+					<span class="text-sm text-slate-500">
+						<span id="commentCharCount">0</span>/2000 characters
+					</span>
+					<button
+						type="submit"
+						class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors">
+						Post Comment
+					</button>
+				</div>
+			</form>
+		</div>
+
+		<!-- Comments List -->
+		<div class="space-y-6">
+			<% if (post.comments && post.comments.length > 0) { %>
+				<% post.comments.forEach(function(comment) { %>
+					<!-- Top-level Comment -->
+					<div class="border-l-2 border-slate-200 pl-4">
+						<div class="flex gap-3">
+							<!-- Author Avatar -->
+							<% if (comment.author.avatarUrl) { %>
+								<img src="<%= comment.author.avatarUrl %>" alt="<%= comment.author.displayName || comment.author.username %>" class="w-10 h-10 rounded-full flex-shrink-0">
+							<% } else { %>
+								<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+									<span class="text-sm font-bold text-teal-600">
+										<%= (comment.author.displayName || comment.author.username).charAt(0).toUpperCase() %>
+									</span>
+								</div>
+							<% } %>
+
+							<div class="flex-1 min-w-0">
+								<div class="bg-slate-50 rounded-lg p-4">
+									<div class="flex items-start justify-between mb-2">
+										<p class="font-semibold text-slate-900">
+											<%= comment.author.displayName || comment.author.username %>
+										</p>
+										<% if (typeof user !== 'undefined' && user && user.id === comment.authorId) { %>
+											<button onclick="deleteComment('<%= comment.id %>')" class="text-slate-400 hover:text-red-600">
+												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+												</svg>
+											</button>
+										<% } %>
+									</div>
+									<p class="text-slate-700">
+										<%= comment.content %>
+									</p>
+									<p class="text-xs text-slate-500 mt-2">
+										<%= new Date(comment.createdAt).toLocaleString() %>
+									</p>
+								</div>
+
+								<!-- Reply Button -->
+								<button
+									onclick="showReplyForm('<%= comment.id %>')"
+									class="text-sm text-teal-600 hover:text-teal-700 mt-2 font-medium">
+									Reply
+								</button>
+
+								<!-- Reply Form (hidden by default) -->
+								<div id="replyForm-<%= comment.id %>" class="hidden mt-3">
+									<form onsubmit="submitReply(event, '<%= comment.id %>')" class="space-y-2">
+										<textarea
+											name="content"
+											rows="2"
+											required
+											maxlength="2000"
+											placeholder="Write a reply..."
+											class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 resize-none text-sm"></textarea>
+										<div class="flex gap-2">
+											<button
+												type="submit"
+												class="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium">
+												Reply
+											</button>
+											<button
+												type="button"
+												onclick="hideReplyForm('<%= comment.id %>')"
+												class="px-4 py-1.5 border border-slate-300 rounded-lg text-sm text-slate-700">
+												Cancel
+											</button>
+										</div>
+									</form>
+								</div>
+
+								<!-- Replies -->
+								<% if (comment.replies && comment.replies.length > 0) { %>
+									<div class="mt-4 space-y-4">
+										<% comment.replies.forEach(function(reply) { %>
+											<div class="flex gap-3">
+												<% if (reply.author.avatarUrl) { %>
+													<img src="<%= reply.author.avatarUrl %>" alt="<%= reply.author.displayName || reply.author.username %>" class="w-8 h-8 rounded-full flex-shrink-0">
+												<% } else { %>
+													<div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+														<span class="text-xs font-bold text-teal-600">
+															<%= (reply.author.displayName || reply.author.username).charAt(0).toUpperCase() %>
+														</span>
+													</div>
+												<% } %>
+
+												<div class="flex-1 min-w-0">
+													<div class="bg-slate-50 rounded-lg p-3">
+														<div class="flex items-start justify-between mb-1">
+															<p class="font-semibold text-sm text-slate-900">
+																<%= reply.author.displayName || reply.author.username %>
+															</p>
+															<% if (typeof user !== 'undefined' && user && user.id === reply.authorId) { %>
+																<button onclick="deleteComment('<%= reply.id %>')" class="text-slate-400 hover:text-red-600">
+																	<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+																	</svg>
+																</button>
+															<% } %>
+														</div>
+														<p class="text-sm text-slate-700">
+															<%= reply.content %>
+														</p>
+														<p class="text-xs text-slate-500 mt-1">
+															<%= new Date(reply.createdAt).toLocaleString() %>
+														</p>
+													</div>
+												</div>
+											</div>
+										<% }); %>
+									</div>
+								<% } %>
+							</div>
+						</div>
+					</div>
+				<% }); %>
+			<% } else { %>
+				<p class="text-slate-500 text-center py-8">
+					No comments yet. Be the first to comment!
+				</p>
+			<% } %>
+		</div>
+	</div>
+</div>
+
+<script>
+// Character count for new comment
+document.getElementById('commentContent').addEventListener('input', function(e) {
+	document.getElementById('commentCharCount').textContent = e.target.value.length;
+});
+
+// Submit new comment
+document.getElementById('newCommentForm').addEventListener('submit', async function(e) {
+	e.preventDefault();
+
+	const form = e.target;
+	const submitButton = form.querySelector('button[type="submit"]');
+	const content = form.querySelector('textarea').value;
+
+	submitButton.disabled = true;
+	submitButton.textContent = 'Posting...';
+
+	try {
+		const response = await fetch('/posts/<%= post.id %>/comments', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ content }),
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			window.location.reload();
+		} else {
+			alert(data.message || 'Failed to post comment');
+			submitButton.disabled = false;
+			submitButton.textContent = 'Post Comment';
+		}
+	} catch (error) {
+		console.error('Error posting comment:', error);
+		alert('An error occurred while posting the comment');
+		submitButton.disabled = false;
+		submitButton.textContent = 'Post Comment';
+	}
+});
+
+// Show reply form
+function showReplyForm(commentId) {
+	document.getElementById(`replyForm-${commentId}`).classList.remove('hidden');
+}
+
+// Hide reply form
+function hideReplyForm(commentId) {
+	document.getElementById(`replyForm-${commentId}`).classList.add('hidden');
+}
+
+// Submit reply
+async function submitReply(event, commentId) {
+	event.preventDefault();
+
+	const form = event.target;
+	const submitButton = form.querySelector('button[type="submit"]');
+	const content = form.querySelector('textarea').value;
+
+	submitButton.disabled = true;
+	submitButton.textContent = 'Posting...';
+
+	try {
+		const response = await fetch(`/comments/${commentId}/replies`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ content }),
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			window.location.reload();
+		} else {
+			alert(data.message || 'Failed to post reply');
+			submitButton.disabled = false;
+			submitButton.textContent = 'Reply';
+		}
+	} catch (error) {
+		console.error('Error posting reply:', error);
+		alert('An error occurred while posting the reply');
+		submitButton.disabled = false;
+		submitButton.textContent = 'Reply';
+	}
+}
+
+// Like/Unlike functionality
+async function toggleLike(postId, button) {
+	const likeCountSpan = button.querySelector('.like-count');
+	const heartIcon = button.querySelector('svg');
+
+	try {
+		const response = await fetch(`/posts/${postId}/like`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			button.dataset.liked = data.data.liked;
+			const currentCount = parseInt(likeCountSpan.textContent);
+			likeCountSpan.textContent = data.data.liked ? currentCount + 1 : currentCount - 1;
+
+			if (data.data.liked) {
+				heartIcon.setAttribute('fill', 'currentColor');
+				heartIcon.classList.add('text-teal-600', '');
+			} else {
+				heartIcon.setAttribute('fill', 'none');
+				heartIcon.classList.remove('text-teal-600', '');
+			}
+		}
+	} catch (error) {
+		console.error('Error toggling like:', error);
+	}
+}
+
+// Delete post
+async function deletePost(postId) {
+	if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+		return;
+	}
+
+	try {
+		const response = await fetch(`/posts/${postId}`, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			window.location.href = '/teams/<%= post.team.id %>/feed';
+		} else {
+			alert(data.message || 'Failed to delete post');
+		}
+	} catch (error) {
+		console.error('Error deleting post:', error);
+		alert('An error occurred while deleting the post');
+	}
+}
+
+// Delete comment
+async function deleteComment(commentId) {
+	if (!confirm('Are you sure you want to delete this comment?')) {
+		return;
+	}
+
+	try {
+		const response = await fetch(`/comments/${commentId}`, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			window.location.reload();
+		} else {
+			alert(data.message || 'Failed to delete comment');
+		}
+	} catch (error) {
+		console.error('Error deleting comment:', error);
+		alert('An error occurred while deleting the comment');
+	}
+}
+</script>

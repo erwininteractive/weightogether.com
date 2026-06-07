@@ -1,0 +1,113 @@
+<div class="max-w-2xl mx-auto">
+    <h2 class="text-3xl font-bold text-gray-900 mb-6">Toast Notifications Demo</h2>
+
+    <div class="bg-white rounded-lg shadow p-6 space-y-6">
+        <div>
+            <h2 class="text-lg font-semibold mb-4">Test Toast Notifications</h2>
+            <p class="text-gray-600 mb-6">Click the buttons below to test different types of toast notifications:</p>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button
+                    onclick="toast.success('This is a success message!')"
+                    class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                >
+                    Show Success Toast
+                </button>
+
+                <button
+                    onclick="toast.error('This is an error message!')"
+                    class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                >
+                    Show Error Toast
+                </button>
+
+                <button
+                    onclick="toast.warning('This is a warning message!')"
+                    class="px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
+                >
+                    Show Warning Toast
+                </button>
+
+                <button
+                    onclick="toast.info('This is an info message!')"
+                    class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                >
+                    Show Info Toast
+                </button>
+            </div>
+        </div>
+
+        <div class="border-t pt-6">
+            <h3 class="font-semibold mb-4">Test Custom Duration</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <button
+                    onclick="toast.success('This will stay for 10 seconds!', 10000)"
+                    class="px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors"
+                >
+                    Long Toast (10s)
+                </button>
+
+                <button
+                    onclick="toast.info('This will disappear quickly!', 2000)"
+                    class="px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+                >
+                    Short Toast (2s)
+                </button>
+            </div>
+        </div>
+
+        <div class="border-t pt-6">
+            <h3 class="font-semibold mb-4">Test Multiple Toasts</h3>
+            <button
+                onclick="
+                    toast.info('First notification');
+                    setTimeout(() => toast.warning('Second notification'), 500);
+                    setTimeout(() => toast.success('Third notification'), 1000);
+                "
+                class="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors w-full"
+            >
+                Show Multiple Toasts
+            </button>
+        </div>
+
+        <div class="border-t pt-6">
+            <h3 class="font-semibold mb-4">Server-Side Flash Messages</h3>
+            <p class="text-gray-600 mb-4 text-sm">
+                These test URL query parameters (how server-side redirects work):
+            </p>
+            <div class="grid grid-cols-2 gap-4">
+                <a
+                    href="?success=Login successful!"
+                    class="px-4 py-3 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-medium text-center transition-colors"
+                >
+                    Test Success Query
+                </a>
+
+                <a
+                    href="?error=Something went wrong!"
+                    class="px-4 py-3 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg font-medium text-center transition-colors"
+                >
+                    Test Error Query
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 class="font-semibold text-blue-900 mb-2">Usage Examples:</h3>
+        <div class="space-y-2 text-sm">
+            <div class="bg-white rounded p-3 font-mono text-xs">
+                <div class="text-gray-600 mb-1">// Client-side JavaScript:</div>
+                <code class="text-blue-600">toast.success('Operation completed!');</code>
+            </div>
+            <div class="bg-white rounded p-3 font-mono text-xs">
+                <div class="text-gray-600 mb-1">// Server-side redirect (Node.js):</div>
+                <code class="text-green-600">res.redirect('/dashboard?success=' + encodeURIComponent('Welcome back!'));</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="/" class="text-teal-600 hover:text-teal-700 font-medium">← Back to Home</a>
+    </div>
+</div>

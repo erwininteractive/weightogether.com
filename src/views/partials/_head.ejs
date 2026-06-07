@@ -1,0 +1,37 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= typeof title !== 'undefined' ? title + ' | WeighTogether' : 'WeighTogether - Track Together. Transform Together.' %></title>
+<meta name="description" content="<%= typeof description !== 'undefined' ? description : 'WeighTogether combines personal tracking with team accountability. Log your progress, join challenges, and celebrate milestones together.' %>">
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<!-- Open Graph -->
+<meta property="og:title" content="<%= typeof title !== 'undefined' ? title + ' | WeighTogether' : 'WeighTogether' %>">
+<meta property="og:description" content="<%= typeof description !== 'undefined' ? description : 'Track your weight. Build your team. Transform together.' %>">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://weightogether.com">
+<meta property="og:image" content="https://weightogether.com/images/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="WeighTogether">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= typeof title !== 'undefined' ? title + ' | WeighTogether' : 'WeighTogether' %>">
+<meta name="twitter:description" content="<%= typeof description !== 'undefined' ? description : 'Track your weight. Build your team. Transform together.' %>">
+<meta name="twitter:image" content="https://weightogether.com/images/og-image.png">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/dist/main.css">
+
+<!-- Alpine.js cloak to prevent flash of hidden elements -->
+<style>[x-cloak] { display: none !important; }</style>

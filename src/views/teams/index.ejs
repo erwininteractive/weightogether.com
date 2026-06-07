@@ -1,0 +1,133 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">My Teams</h1>
+            <p class="text-gray-600 mt-1">Connect with others on your fitness journey</p>
+        </div>
+        <a href="/teams/create" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create Team
+        </a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <% if (success) { %>
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <%= success %>
+        </div>
+    <% } %>
+    <% if (error) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <!-- My Teams Section -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-slate-800">Teams You're In</h2>
+        </div>
+        <% if (myTeams.length === 0) { %>
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-500 mb-4">You're not in any teams yet</p>
+                <a href="/teams/create" class="text-teal-600 hover:text-teal-700 font-medium">Create your first team</a>
+            </div>
+        <% } else { %>
+            <div class="divide-y divide-gray-100">
+                <% myTeams.forEach(function(membership) { %>
+                    <a href="/teams/<%= membership.team.id %>" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
+                        <% if (membership.team.avatarUrl) { %>
+                            <img src="<%= membership.team.avatarUrl %>" alt="<%= membership.team.name %>" class="w-12 h-12 rounded-lg object-cover">
+                        <% } else { %>
+                            <div class="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center text-white text-lg font-bold">
+                                <%= membership.team.name.charAt(0).toUpperCase() %>
+                            </div>
+                        <% } %>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-medium text-gray-900 truncate"><%= membership.team.name %></h3>
+                                <% if (!membership.team.isPublic) { %>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                <% } %>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate">
+                                <%= membership.team._count.members %> member<%= membership.team._count.members !== 1 ? 's' : '' %>
+                                <% if (membership.role !== 'MEMBER') { %>
+                                    <span class="mx-1">-</span>
+                                    <span class="text-purple-600"><%= membership.role.charAt(0) + membership.role.slice(1).toLowerCase() %></span>
+                                <% } %>
+                            </p>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Discover Public Teams Section -->
+    <% if (publicTeams.length > 0) { %>
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b border-gray-100">
+                <h2 class="text-lg font-semibold text-slate-800">Discover Teams</h2>
+                <p class="text-sm text-gray-500 mt-1">Join public teams to connect with others</p>
+            </div>
+            <div class="divide-y divide-gray-100">
+                <% publicTeams.forEach(function(team) { %>
+                    <div class="flex items-center gap-4 p-4">
+                        <% if (team.avatarUrl) { %>
+                            <img src="<%= team.avatarUrl %>" alt="<%= team.name %>" class="w-12 h-12 rounded-lg object-cover">
+                        <% } else { %>
+                            <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center text-white text-lg font-bold">
+                                <%= team.name.charAt(0).toUpperCase() %>
+                            </div>
+                        <% } %>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-medium text-gray-900 truncate"><%= team.name %></h3>
+                            <p class="text-sm text-gray-500">
+                                <%= team._count.members %> member<%= team._count.members !== 1 ? 's' : '' %>
+                                <% if (team.description) { %>
+                                    <span class="mx-1">-</span>
+                                    <span class="truncate"><%= team.description.substring(0, 50) %><%= team.description.length > 50 ? '...' : '' %></span>
+                                <% } %>
+                            </p>
+                        </div>
+                        <form action="/teams/<%= team.id %>/join" method="POST" class="shrink-0">
+                            <button type="submit" class="px-4 py-2 text-sm font-medium text-teal-600 hover:text-teal-700 hover:bg-blue-50 rounded-lg transition-colors">
+                                Join
+                            </button>
+                        </form>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Join via Invite Code -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">Have an Invite Code?</h2>
+        <form action="/teams/join/" method="GET" class="flex gap-3" x-data="{ code: '' }" @submit.prevent="if(code) window.location.href = '/teams/join/' + code">
+            <input 
+                type="text" 
+                x-model="code"
+                placeholder="Enter invite code"
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 placeholder-gray-500"
+            >
+            <button type="submit" class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors">
+                Join Team
+            </button>
+        </form>
+    </div>
+</div>

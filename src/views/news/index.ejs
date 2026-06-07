@@ -1,0 +1,117 @@
+<!-- News Page -->
+<section class="py-16 bg-white">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<!-- Header -->
+		<div class="text-center mb-12">
+			<h1 class="text-3xl font-display font-bold text-slate-900 sm:text-4xl">
+				Fitness & Nutrition News
+			</h1>
+			<p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+				Stay up to date with the latest research, tips, and trends in fitness, nutrition, and weight management.
+			</p>
+		</div>
+
+		<!-- Category Filter -->
+		<div class="flex flex-wrap justify-center gap-2 mb-8">
+			<a href="/news" class="px-4 py-2 rounded-full text-sm font-medium transition-colors <%= currentCategory === 'all' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' %>">
+				All
+			</a>
+			<a href="/news?category=fitness" class="px-4 py-2 rounded-full text-sm font-medium transition-colors <%= currentCategory === 'fitness' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' %>">
+				Fitness
+			</a>
+			<a href="/news?category=nutrition" class="px-4 py-2 rounded-full text-sm font-medium transition-colors <%= currentCategory === 'nutrition' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' %>">
+				Nutrition
+			</a>
+			<a href="/news?category=weight-loss" class="px-4 py-2 rounded-full text-sm font-medium transition-colors <%= currentCategory === 'weight-loss' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' %>">
+				Weight Loss
+			</a>
+			<a href="/news?category=exercise" class="px-4 py-2 rounded-full text-sm font-medium transition-colors <%= currentCategory === 'exercise' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' %>">
+				Exercise
+			</a>
+		</div>
+
+		<!-- Articles Grid -->
+		<% if (articles && articles.length > 0) { %>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<% articles.forEach(function(article) { %>
+			<article class="bg-slate-50 rounded-xl overflow-hidden border border-slate-200 hover:shadow-lg transition-shadow">
+				<% if (article.imageUrl) { %>
+				<a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="block">
+					<img
+						src="<%= article.imageUrl %>"
+						alt=""
+						class="w-full h-48 object-cover"
+						loading="lazy"
+					/>
+				</a>
+				<% } %>
+				<div class="p-5">
+					<div class="flex items-center gap-2 mb-3">
+						<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+							<%= article.category %>
+						</span>
+						<span class="text-xs text-slate-500">
+							<%= article.formattedDate %>
+						</span>
+					</div>
+					<a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="block group">
+						<h3 class="font-semibold text-slate-900 group-hover:text-teal-600 transition-colors line-clamp-2">
+							<%= article.title %>
+						</h3>
+					</a>
+					<p class="mt-2 text-sm text-slate-600 line-clamp-3">
+						<%= article.description %>
+					</p>
+					<div class="mt-4 flex items-center justify-between">
+						<span class="text-xs text-slate-500">
+							<%= article.source.name %>
+						</span>
+						<a href="<%= article.url %>" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-teal-600 hover:text-teal-700">
+							Read more &rarr;
+						</a>
+					</div>
+				</div>
+			</article>
+			<% }); %>
+		</div>
+
+		<!-- Pagination -->
+		<% if (hasMore || currentPage > 1) { %>
+		<div class="mt-12 flex justify-center gap-4">
+			<% if (currentPage > 1) { %>
+			<a href="/news?page=<%= currentPage - 1 %><%= currentCategory !== 'all' ? '&category=' + currentCategory : '' %>" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+				<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+				</svg>
+				Previous
+			</a>
+			<% } %>
+			<% if (hasMore) { %>
+			<a href="/news?page=<%= currentPage + 1 %><%= currentCategory !== 'all' ? '&category=' + currentCategory : '' %>" class="inline-flex items-center px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+				Next
+				<svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+				</svg>
+			</a>
+			<% } %>
+		</div>
+		<% } %>
+
+		<% } else { %>
+		<!-- Empty State -->
+		<div class="text-center py-12 bg-slate-50 rounded-xl border border-slate-200">
+			<svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+			</svg>
+			<h3 class="mt-2 text-sm font-semibold text-slate-900">No news available</h3>
+			<p class="mt-1 text-sm text-slate-500">
+				<% if (currentCategory !== 'all') { %>
+				No articles found in this category. <a href="/news" class="text-teal-600 hover:underline">View all news</a>
+				<% } else { %>
+				Check back later for the latest fitness and nutrition updates.
+				<% } %>
+			</p>
+		</div>
+		<% } %>
+	</div>
+</section>

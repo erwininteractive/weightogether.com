@@ -1,0 +1,270 @@
+<!-- Donate Page -->
+<section class="py-16 bg-white">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center mb-12">
+			<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+				<svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+				</svg>
+			</div>
+			<h1 class="text-3xl font-display font-bold text-slate-900 sm:text-4xl">
+				Support WeighTogether
+			</h1>
+			<p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+				WeighTogether is free to use and ad-free. Your donation helps us maintain servers,
+				develop new features, and keep the platform accessible to everyone.
+			</p>
+		</div>
+
+		<!-- Why Donate Section -->
+		<div class="bg-slate-50 rounded-xl p-8 mb-12 border border-slate-200">
+			<h2 class="text-xl font-semibold text-slate-900 mb-6">Your donation helps us:</h2>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+						<svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"></path>
+						</svg>
+					</div>
+					<div>
+						<h3 class="font-medium text-slate-900">Keep servers running</h3>
+						<p class="text-sm text-slate-600">Hosting and infrastructure costs to keep the app fast and reliable.</p>
+					</div>
+				</div>
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+						<svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+						</svg>
+					</div>
+					<div>
+						<h3 class="font-medium text-slate-900">Build new features</h3>
+						<p class="text-sm text-slate-600">Develop tools that help you reach your health goals faster.</p>
+					</div>
+				</div>
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+						<svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+					</div>
+					<div>
+						<h3 class="font-medium text-slate-900">Stay ad-free</h3>
+						<p class="text-sm text-slate-600">We believe in a clean, distraction-free experience.</p>
+					</div>
+				</div>
+				<div class="flex items-start gap-4">
+					<div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+						<svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+						</svg>
+					</div>
+					<div>
+						<h3 class="font-medium text-slate-900">Protect your privacy</h3>
+						<p class="text-sm text-slate-600">Your data is yours. We never sell it to third parties.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Donation Form -->
+		<div class="bg-slate-50 rounded-xl p-8 border border-slate-200">
+			<h2 class="text-xl font-semibold text-slate-900 mb-6 text-center">Make a Donation</h2>
+
+			<!-- Amount Selection -->
+			<div class="mb-8">
+				<label class="block text-sm font-medium text-slate-700 mb-3 text-center">
+					Select an amount
+				</label>
+				<div class="grid grid-cols-3 sm:grid-cols-5 gap-3 max-w-lg mx-auto mb-4">
+					<% suggestedAmounts.forEach(function(amt) { %>
+					<button
+						type="button"
+						class="amount-btn px-4 py-3 text-sm font-semibold rounded-lg border-2 transition-colors <%= amt === defaultAmount ? 'selected' : '' %>"
+						data-amount="<%= amt %>"
+					>
+						$<%= amt %>
+					</button>
+					<% }); %>
+				</div>
+				<div class="max-w-xs mx-auto">
+					<label for="custom-amount" class="sr-only">Custom amount</label>
+					<div class="relative">
+						<span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+						<input
+							type="number"
+							id="custom-amount"
+							name="customAmount"
+							min="<%= minAmount %>"
+							max="<%= maxAmount %>"
+							step="1"
+							placeholder="Other amount"
+							class="w-full pl-8 pr-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+						/>
+					</div>
+				</div>
+			</div>
+
+			<!-- PayPal Button Container -->
+			<div id="paypal-button-container" class="max-w-md mx-auto"></div>
+
+			<!-- Loading State -->
+			<div id="paypal-loading" class="text-center py-8">
+				<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+				<p class="mt-2 text-sm text-slate-600">Loading payment options...</p>
+			</div>
+
+			<!-- Error State -->
+			<div id="paypal-error" class="hidden text-center py-8">
+				<p class="text-red-600 mb-4">Unable to load payment options. Please try again.</p>
+				<a href="/donate" class="text-teal-600 hover:underline">Refresh page</a>
+			</div>
+
+			<p class="mt-6 text-sm text-slate-500 text-center">
+				Donations are processed securely through PayPal. You do not need a PayPal account to donate.
+			</p>
+		</div>
+
+		<!-- Thank You Message -->
+		<div class="mt-12 text-center">
+			<p class="text-slate-600">
+				Thank you for considering a donation. Every contribution, no matter the size, makes a difference.
+			</p>
+			<p class="mt-2 text-sm text-slate-500">
+				Have questions? <a href="/about" class="text-teal-600 hover:underline">Contact us</a>
+			</p>
+		</div>
+	</div>
+</section>
+
+<style>
+.amount-btn {
+	background-color: white;
+	border-color: rgb(203 213 225);
+	color: rgb(51 65 85);
+}
+.amount-btn:hover {
+	border-color: rgb(59 130 246);
+	color: rgb(59 130 246);
+}
+.amount-btn.selected {
+	background-color: rgb(59 130 246);
+	border-color: rgb(59 130 246);
+	color: white;
+}
+.dark .amount-btn {
+	background-color: rgb(51 65 85);
+	border-color: rgb(71 85 105);
+	color: rgb(226 232 240);
+}
+.dark .amount-btn:hover {
+	border-color: rgb(96 165 250);
+	color: rgb(96 165 250);
+}
+.dark .amount-btn.selected {
+	background-color: rgb(37 99 235);
+	border-color: rgb(37 99 235);
+	color: white;
+}
+</style>
+
+<% if (paypalClientId) { %>
+<script src="https://www.paypal.com/sdk/js?client-id=<%= paypalClientId %>&currency=USD&intent=capture&enable-funding=venmo,card"></script>
+<script>
+(function() {
+	const minAmount = <%= minAmount %>;
+	const maxAmount = <%= maxAmount %>;
+	const defaultAmount = <%= defaultAmount %>;
+	let selectedAmount = defaultAmount;
+
+	// Amount selection
+	document.querySelectorAll('.amount-btn').forEach(btn => {
+		btn.addEventListener('click', function() {
+			document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+			this.classList.add('selected');
+			selectedAmount = parseFloat(this.dataset.amount);
+			document.getElementById('custom-amount').value = '';
+		});
+	});
+
+	// Custom amount input
+	document.getElementById('custom-amount').addEventListener('input', function() {
+		const value = parseFloat(this.value);
+		if (value >= minAmount && value <= maxAmount) {
+			document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+			selectedAmount = value;
+		}
+	});
+
+	// Initialize PayPal
+	function initPayPal() {
+		const loadingEl = document.getElementById('paypal-loading');
+		const errorEl = document.getElementById('paypal-error');
+
+		if (typeof paypal === 'undefined') {
+			loadingEl.classList.add('hidden');
+			errorEl.classList.remove('hidden');
+			return;
+		}
+
+		loadingEl.classList.add('hidden');
+
+		paypal.Buttons({
+			style: {
+				layout: 'vertical',
+				color: 'blue',
+				shape: 'rect',
+				label: 'donate'
+			},
+			createOrder: async function() {
+				const amount = selectedAmount || defaultAmount;
+				if (amount < minAmount || amount > maxAmount) {
+					throw new Error('Invalid amount');
+				}
+
+				const response = await fetch('/api/donate/create-order', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ amount, currency: 'USD' })
+				});
+
+				const data = await response.json();
+				if (data.error) throw new Error(data.error);
+				return data.orderId;
+			},
+			onApprove: async function(data) {
+				const response = await fetch('/api/donate/capture-order', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ orderId: data.orderID })
+				});
+
+				const result = await response.json();
+				if (result.success) {
+					window.location.href = '/donate/thank-you?success=true';
+				} else {
+					throw new Error('Payment capture failed');
+				}
+			},
+			onError: function(err) {
+				console.error('PayPal error:', err);
+				alert('There was an error processing your donation. Please try again.');
+			}
+		}).render('#paypal-button-container');
+	}
+
+	// Wait for PayPal SDK to load
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function() {
+			setTimeout(initPayPal, 500);
+		});
+	} else {
+		setTimeout(initPayPal, 500);
+	}
+})();
+</script>
+<% } else { %>
+<script>
+document.getElementById('paypal-loading').innerHTML = '<p class="text-amber-600">PayPal is not configured. Please contact the administrator.</p>';
+</script>
+<% } %>
