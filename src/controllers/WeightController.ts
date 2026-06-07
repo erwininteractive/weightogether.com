@@ -6,6 +6,7 @@ import { EntryVisibility } from "@prisma/client";
 import fs from "fs";
 import path from "path";
 import { AchievementService } from "../services/achievement.service";
+import { PrivacyService } from "../services/privacy.service";
 
 // Visibility options
 export const VISIBILITY_OPTIONS = [
@@ -331,21 +332,28 @@ export class WeightController {
 				});
 			}
 
+			// TODO: unlockedAchievements should be a type of Achievement[]
 			// Check for achievement unlocks (only for new entries, not updates)
 			const unlockedAchievements: any[] = [];
 			if (!entryId) {
 				try {
 					const weightAchievements =
-						await AchievementService.checkWeightAchievements(userId);
+						await AchievementService.checkWeightAchievements(
+							userId,
+						);
 					const streakAchievements =
-						await AchievementService.checkStreakAchievements(userId);
+						await AchievementService.checkStreakAchievements(
+							userId,
+						);
 					const engagementAchievements =
-						await AchievementService.checkEngagementAchievements(userId);
+						await AchievementService.checkEngagementAchievements(
+							userId,
+						);
 					const hiddenAchievements =
 						await AchievementService.checkHiddenAchievements(
 							userId,
 							entryData.weight,
-							entryData.recordedAt
+							entryData.recordedAt,
 						);
 
 					unlockedAchievements.push(
@@ -359,7 +367,6 @@ export class WeightController {
 					console.error("Error checking achievements:", error);
 				}
 			}
-
 
 			// Build redirect URL with success message and achievements
 			let redirectUrl =
@@ -596,6 +603,51 @@ export class WeightController {
 			});
 
 			res.json({ success: true });
+		} catch (error) {
+			next(error);
+		}
+	}
+
+	/**
+	 * GET /users/:userId/progress
+	 * Display user's weight progress
+	 */
+	static async viewUserProgress(
+		req: AuthenticatedRequest,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		try {
+			const viewerId = req.user?.sub ?? null;
+			const ownerId = req.params.userId;
+
+			// Build a visibility-aware filter instead of `{ userId }`.
+			const where = await PrivacyService.weightEntryVisibilityFilter(
+				viewerId,
+				ownerId,
+			);
+
+			const entries = await prisma.weightEntry.findMany({
+				where, // ← visibility ENFORCED here
+				orderBy: { recordedAt: "desc" },
+				include: {
+					// Only include photos the viewer can see, too.
+					photos: {
+						where:
+							viewerId === ownerId
+								? {}
+								: { visibility: { in: ["PUBLIC", "TEAM"] } },
+						orderBy: { sortOrder: "asc" },
+					},
+				},
+			});
+
+			res.render("weight/index", {
+				title: "Progress",
+				entries,
+				isOwnProfile: viewerId === ownerId,
+				// ...stats computed from the FILTERED set only
+			});
 		} catch (error) {
 			next(error);
 		}
