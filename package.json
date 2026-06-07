@@ -17,7 +17,7 @@
 		"test:coverage": "jest --coverage",
 		"test:unit": "jest tests/unit",
 		"test:integration": "jest tests/integration",
-		"test:ci": "jest forceExit --ci --coverage --maxWorkers=1",
+		"test:ci": "jest --forceExit --ci --coverage --maxWorkers=1",
 		"db:start": "docker compose up -d",
 		"db:stop": "docker compose down",
 		"db:logs": "docker compose logs -f db",
