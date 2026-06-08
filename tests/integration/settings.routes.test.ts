@@ -165,7 +165,7 @@ describe("Settings Routes", () => {
 
 			const isNewPasswordValid = await bcrypt.compare(
 				"NewPassword123",
-				updatedUser!.passwordHash,
+				updatedUser!.passwordHash!,
 			);
 			expect(isNewPasswordValid).toBe(true);
 		});

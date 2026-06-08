@@ -431,6 +431,14 @@ export class EmailService {
 			return false;
 		}
 	}
+
+	/**
+	 * Close the SMTP transporter. Called during test teardown
+	 * to prevent Jest from hanging on open handles.
+	 */
+	close(): void {
+		this.transporter.close();
+	}
 }
 
 export const emailService = new EmailService();

@@ -23,12 +23,10 @@ module.exports = {
 			},
 		],
 	},
-	setupFiles: ["<rootDir>/tests/setup.ts"],
-	globalTeardown: "<rootDir>/tests/teardown.ts",
+	setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
 	testTimeout: 15000, // Increased timeout for slow tests
 	clearMocks: true,
 	resetMocks: true,
 	restoreMocks: true,
 	maxWorkers: 1, // Run tests sequentially to avoid database deadlocks
-	forceExit: true, // Force Jest to exit after tests complete
 };

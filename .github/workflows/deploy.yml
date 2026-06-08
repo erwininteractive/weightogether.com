@@ -52,7 +52,7 @@ jobs:
               env:
                   DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb?schema=public
                   NODE_ENV: test
-              # run: npm test
+              run: npm test
 
     deploy:
         name: Deploy to Server
