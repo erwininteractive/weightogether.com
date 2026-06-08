@@ -1,0 +1,26 @@
+#!/bin/bash
+# Pre-push hook: run tests before pushing to main
+# Install with: cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+
+echo "Running tests before push..."
+
+# Use test database
+export DATABASE_URL="postgresql://devuser:devpassword@localhost:5433/testdb?schema=public"
+export NODE_ENV=test
+
+# Ensure test database is ready
+npx prisma db push --force-reset --accept-data-loss 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "❌ Test database not available. Is Docker running? (npm run db:start)"
+    exit 1
+fi
+
+# Run tests
+npm test
+if [ $? -ne 0 ]; then
+    echo "❌ Tests failed. Push aborted."
+    exit 1
+fi
+
+echo "✅ Tests passed. Pushing..."
+exit 0
